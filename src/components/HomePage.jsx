@@ -1522,6 +1522,7 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
 function CollectionsView({ prompts, onSelectCollection, query }) {
   const ref = useFadeIn();
   const collections = useMemo(() => {
+    if (!Array.isArray(prompts)) return []; // Defense
     const groups = {};
     prompts.forEach(p => {
       const pTags = Array.isArray(p.tags) && p.tags.length > 0 ? p.tags : ["GENERAL"];
@@ -1883,16 +1884,16 @@ export default function PromptGallery() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const filtered = useMemo(() =>
-    (prompts || []).filter(p => {
+  const filtered = useMemo(() => {
+    const pArr = Array.isArray(prompts) ? prompts : [];
+    return pArr.filter(p => {
       const matchFilter = filter === "ALL" || filter === "ALL CATEGORIES" || (p.tags || []).some(t => t.toLowerCase() === filter.toLowerCase());
-      const matchQuery = !query || p.title.toLowerCase().includes(query.toLowerCase())
+      const matchQuery = !query || (p.title || "").toLowerCase().includes(query.toLowerCase())
         || (p.prompt && p.prompt.toLowerCase().includes(query.toLowerCase()))
         || (p.tags || []).some(t => t.toLowerCase().includes(query.toLowerCase()));
       return matchFilter && matchQuery;
-    }),
-    [prompts, filter, query]
-  );
+    });
+  }, [prompts, filter, query]);
 
   const featured = prompts[0];
 
