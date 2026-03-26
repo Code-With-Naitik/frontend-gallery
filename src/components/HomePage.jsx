@@ -1424,15 +1424,15 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
     const rect = cardEl.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
-    
+
     const rotateX = (y - centerY) / 20; // stronger tilt
     const rotateY = (centerX - x) / 20;
-    
+
     cardEl.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-20px) scale(1.05)`;
-    
+
     const shine = cardEl.querySelector('.spotlight-shine');
     if (shine) {
       shine.style.transform = `translate(${x - rect.width}px, ${y - rect.height}px)`;
@@ -1448,7 +1448,7 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
   return (
     <div ref={ref} className="hp-fade spotlight-section">
       <div className="spotlight-glow" />
-      
+
       <div style={{ padding: "0 2.5rem 4rem", maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 5 }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
@@ -1459,11 +1459,11 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
             SPOTLIGHT<br /><span style={{ color: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.3)" }}>GALLERY</span>
           </h2>
         </div>
-        <button 
-          onClick={onViewAll} 
-          className="hp-btn-ghost" 
-          style={{ 
-            padding: "1rem 2.5rem", 
+        <button
+          onClick={onViewAll}
+          className="hp-btn-ghost"
+          style={{
+            padding: "1rem 2.5rem",
             borderRadius: "100px",
             fontSize: "0.85rem",
             background: "rgba(255,255,255,0.03)",
@@ -1484,9 +1484,9 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
         }}
       >
         {items.map((cat, i) => (
-          <div 
-            key={i} 
-            className="spotlight-card" 
+          <div
+            key={i}
+            className="spotlight-card"
             onClick={() => onOpen(cat)}
             onMouseMove={(e) => handleMouseMove(e, e.currentTarget)}
             onMouseLeave={(e) => handleMouseLeave(e.currentTarget)}
@@ -1496,14 +1496,14 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
               <img src={cat.imageUrl} className="spotlight-img" alt={cat.title} />
             </div>
             <div className="spotlight-overlay" />
-            
+
             <div className="spotlight-info">
               <div className="spotlight-meta">
                 <span className="spotlight-tag">{cat.tags?.[0] || 'Aesthetic'}</span>
                 <Stars rating={5} />
               </div>
               <h3 className="spotlight-title">{cat.title}</h3>
-              
+
               <div className="spotlight-actions" onClick={(e) => e.stopPropagation()}>
                 <button className="btn-spotlight btn-spotlight-ghost" onClick={() => onOpen(cat)}>View Design</button>
                 <button className="btn-spotlight btn-spotlight-solid" onClick={() => onOpen(cat)}>Get Prompt</button>
@@ -1885,7 +1885,7 @@ export default function PromptGallery() {
 
   const filtered = useMemo(() =>
     (prompts || []).filter(p => {
-      const matchFilter = filter === "ALL" || (p.tags || []).some(t => t.toLowerCase().includes(filter.toLowerCase()));
+      const matchFilter = filter === "ALL" || filter === "ALL" || (p.tags || []).some(t => t.toLowerCase().includes(filter.toLowerCase()));
       const matchQuery = !query || p.title.toLowerCase().includes(query.toLowerCase())
         || (p.prompt && p.prompt.toLowerCase().includes(query.toLowerCase()))
         || (p.tags || []).some(t => t.toLowerCase().includes(query.toLowerCase()));
