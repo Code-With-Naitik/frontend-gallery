@@ -44,6 +44,15 @@ const css = `
   .pd-meta { font-size: 0.72rem; font-family: var(--mono); color: var(--muted); letter-spacing: 0.04em; }
   .pd-divider { width: 100%; height: 1px; background: var(--border); margin: 2rem 0; }
   .pd-state { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; color: var(--muted); font-size: 0.85rem; font-family: var(--mono); }
+  
+  @media (max-width: 768px) {
+    .pd-nav { padding: 0.8rem 1.5rem; }
+    .pd-hero { max-height: 400px; }
+    .pd-hero img { height: 400px; }
+    .pd-hero-content { padding: 1.5rem; }
+    .pd-body { padding: 1.5rem 1.5rem 4rem; }
+    .pd-actions { flex-direction: column; align-items: stretch; }
+  }
 `;
 
 const PromptDetail = () => {

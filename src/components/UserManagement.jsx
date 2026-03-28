@@ -99,6 +99,14 @@ const UserManagement = () => {
         .nav-item.active { background: rgba(139,92,246,.1); color: #8b5cf6; }
         .logout-btn { margin: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(239,68,68,.08); color: #ef4444; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; transition: .2s; }
         .logout-btn:hover { background: rgba(239,68,68,.15); }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .um-main-header { padding: 0 1.5rem !important; }
+            .um-content { padding: 2rem 1.5rem !important; }
+            .um-form-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
+            .um-title { font-size: 1.8rem !important; }
+        }
     `;
 
     return (
@@ -130,22 +138,24 @@ const UserManagement = () => {
             </aside>
 
             <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <header style={{
+                <header className="um-main-header" style={{
                     height: 72, borderBottom: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex', alignItems: 'center', padding: '0 2.5rem',
                     background: 'rgba(5,6,11,0.5)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 10
                 }}>
+
                     <div style={{ padding: '0 0.5rem', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>
                         ADMINISTRATOR ACCESS GRANTED
                     </div>
                 </header>
 
-                <div style={{ padding: '2.5rem 3rem', flex: 1 }}>
+                <div className="um-content" style={{ padding: '2.5rem 3rem', flex: 1 }}>
                     <div style={{ marginBottom: '2.5rem' }}>
-                        <h1 style={{ 
+                        <h1 className="um-title" style={{ 
                             fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: '2.4rem', fontWeight: 900, 
                             letterSpacing: '-0.02em', color: '#fff', margin: 0 
                         }}>
+
                             User Management
                         </h1>
                         <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
@@ -166,7 +176,8 @@ const UserManagement = () => {
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '1.25rem', alignItems: 'end' }}>
+                            <form onSubmit={handleSubmit} className="um-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '1.25rem', alignItems: 'end' }}>
+
                                 <div>
                                     <label style={{ display: 'block', marginBottom: '0.6rem', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Username</label>
                                     <input

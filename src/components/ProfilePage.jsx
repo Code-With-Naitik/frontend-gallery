@@ -82,6 +82,15 @@ const ProfilePage = () => {
         .nav-item.active { background: rgba(139,92,246,.1); color: #8b5cf6; }
         .logout-btn { margin: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(239,68,68,.08); color: #ef4444; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; transition: .2s; }
         .logout-btn:hover { background: rgba(239,68,68,.15); }
+        
+        @media (max-width: 1024px) {
+            .sidebar { display: none; }
+            .profile-main { padding: 5rem 1.5rem 2rem !important; }
+            .profile-card { padding-bottom: 2rem !important; }
+            .profile-name { font-size: 1.8rem !important; }
+            .profile-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+            .profile-info { padding: 0 1.5rem !important; }
+        }
     `;
 
     return (
@@ -118,7 +127,7 @@ const ProfilePage = () => {
             )}
 
             {/* Main Content */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: isActiveAdmin ? '2rem 2rem' : '4rem 2rem' }}>
+            <div className="profile-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: isActiveAdmin ? '2rem 2rem' : '4rem 2rem' }}>
                 
                 {/* Header Actions */}
                 <div style={{ width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'space-between', marginBottom: '3rem' }}>
@@ -139,7 +148,7 @@ const ProfilePage = () => {
                 </div>
 
                 {/* Profile Card */}
-                <div style={{ 
+                <div className="profile-card" style={{ 
                     width: '100%', maxWidth: '800px', background: 'rgba(255,255,255,0.02)', 
                     border: '1px solid rgba(255,255,255,0.08)', borderRadius: '32px', overflow: 'hidden', paddingBottom: '3rem'
                 }}>
@@ -153,7 +162,7 @@ const ProfilePage = () => {
                     </div>
 
                     {/* Profile Info Overlay */}
-                    <div style={{ padding: '0 3rem', marginTop: '-60px', textAlign: 'center' }}>
+                    <div className="profile-info" style={{ padding: '0 3rem', marginTop: '-60px', textAlign: 'center' }}>
                         
                         {/* Avatar */}
                         <div style={{ position: 'relative', display: 'inline-block', marginBottom: '1.5rem' }}>
@@ -195,7 +204,7 @@ const ProfilePage = () => {
                         ) : (
                             <div style={{ marginBottom: '2.5rem' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '0.25rem' }}>
-                                    <h1 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFF', letterSpacing: '-0.04em' }}>{activeProfile?.username}</h1>
+                                    <h1 className="profile-name" style={{ fontSize: '2.5rem', fontWeight: 900, color: '#FFF', letterSpacing: '-0.04em' }}>{activeProfile?.username}</h1>
                                     <button onClick={() => setIsEditing(true)} style={{ background: 'none', border: 'none', color: '#71717A', cursor: 'pointer' }}>
                                         <Edit2 size={20} />
                                     </button>
@@ -218,7 +227,7 @@ const ProfilePage = () => {
                         <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)', width: '100%', marginBottom: '2.5rem' }} />
 
                         {/* Profile Details Grid */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'left' }}>
+                        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '2rem', textAlign: 'left' }}>
                             
                             <div style={{ background: 'rgba(255,255,255,0.03)', padding: '1.5rem', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                 <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Account Role</span>

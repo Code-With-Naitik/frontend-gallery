@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { Menu, X, Search, LayoutGrid, Bookmark, PlusCircle } from 'lucide-react';
 
 const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, token } = useAuth();
 
   useEffect(() => {
@@ -12,33 +14,66 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
   }, []);
 
   return (
-    <div style={{
-      position: "fixed", top: "1.5rem", left: "50%", transform: "translateX(-50%)",
-      zIndex: 1000, width: "auto", minWidth: "40%", maxWidth: "1320px",
-      transition: "all 0.4s cubic-bezier(0.22, 1, 0.36, 1)"
-    }}>
-      <nav style={{
-        background: scrolled ? "rgba(10, 10, 12, 0.85)" : "rgba(12, 12, 14, 0.6)",
-        backdropFilter: "blur(16px)",
-        border: "1px solid rgba(255, 255, 255, 0.08)",
-        borderRadius: "100px",
-        padding: "0.6rem 1.7rem",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        boxShadow: scrolled ? "0 20px 40px rgba(0,0,0,0.6)" : "0 10px 30px rgba(0,0,0,0.3)",
-        transition: "all 0.4s ease"
-      }}>
-        <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none", gap: "5rem" }}>
-          {/* Logo */}
-          <span style={{
-            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.25rem",
-            color: "#FFF", textTransform: "lowercase", gap: "3rem"
-          }}>
-            banana
-          </span>
-        </a>
+    <>
+      <style>{`
+        .nav-container {
+          position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
+          z-index: 1000; width: 92%; max-width: 1320px;
+          transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .nav-inner {
+          background: ${scrolled ? "rgba(10, 10, 12, 0.85)" : "rgba(12, 12, 14, 0.6)"};
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 100px;
+          padding: 0.6rem 1.2rem;
+          display: flex; align-items: center; justify-content: space-between;
+          box-shadow: ${scrolled ? "0 20px 40px rgba(0,0,0,0.6)" : "0 10px 30px rgba(0,0,0,0.3)"};
+        }
+        .nav-links-desktop { display: flex; align-items: center; gap: 2.5rem; }
+        .nav-search-desktop { flex: 1; max-width: 340px; margin: 0 1.5rem; }
+        .mobile-btn { display: none; background: none; border: none; color: #FFF; cursor: pointer; padding: 4px; }
+        
+        @media (max-width: 1024px) {
+          .nav-links-desktop, .nav-search-desktop { display: none; }
+          .mobile-btn { display: block; }
+          .nav-container { top: 1rem; width: 95%; }
+          .nav-auth-desktop span { display: none; }
+        }
 
-        {/* Navigation Core */}
-        <div style={{ display: "flex", alignItems: "center", gap: "2.5rem" }}>
+        .mobile-overlay {
+          position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+          backdrop-filter: blur(20px); z-index: 2000;
+          display: flex; flex-direction: column; padding: 2.5rem;
+          transform: translateY(-100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mobile-overlay.open { transform: translateY(0); }
+        .mobile-link {
+          padding: 1.25rem 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+          color: #71717A; text-decoration: none; font-size: 1.5rem; font-weight: 700;
+          display: flex; align-items: center; gap: 1rem;
+        }
+        .mobile-link.active { color: #FFF; }
+      `}</style>
+
+      <div className="nav-container">
+        <nav className="nav-inner">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button className="mobile-btn" onClick={() => setMobileMenuOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <a href="/" style={{ display: "flex", alignItems: "center", textDecoration: "none" }}>
+              <span style={{
+                fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.25rem",
+                color: "#FFF", textTransform: "lowercase"
+              }}>
+                banana
+              </span>
+            </a>
+          </div>
+
+          <div className="nav-links-desktop">
           {[
             { id: "GALLERY", label: "Gallery" },
             { id: "COLLECTIONS", label: "Curation" },
@@ -79,7 +114,7 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
         </div>
 
         {/* Integrated Search */}
-        <div style={{ flex: 1, maxWidth: "340px", margin: "0 1.5rem" }}>
+        <div className="nav-search-desktop">
           <div style={{
             display: "flex", alignItems: "center", gap: "0.75rem",
             background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
@@ -136,6 +171,41 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
         </div>
       </nav>
     </div>
+
+    {/* Mobile Menu Overlay */}
+    <div className={`mobile-overlay ${mobileMenuOpen ? 'open' : ''}`}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+        <span style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.75rem", color: "#FFF" }}>banana</span>
+        <button style={{ background: 'none', border: 'none', color: '#FFF' }} onClick={() => setMobileMenuOpen(false)}>
+          <X size={32} />
+        </button>
+      </div>
+
+      <nav style={{ display: 'flex', flexDirection: 'column' }}>
+        {[
+          { id: "GALLERY", label: "Gallery", icon: LayoutGrid },
+          { id: "COLLECTIONS", label: "Curation", icon: Bookmark },
+          { id: "WISHLIST", label: "Wishlist", icon: Bookmark },
+          { id: "UPLOAD", label: "Create", icon: PlusCircle }
+        ].map(item => (
+          <a
+            key={item.id}
+            href="#"
+            className={`mobile-link ${currentView === item.id ? 'active' : ''}`}
+            onClick={e => {
+              e.preventDefault();
+              setMobileMenuOpen(false);
+              if ((item.id === "UPLOAD" || item.id === "WISHLIST") && !token) { onAuthModal(true); return; }
+              onView(item.id);
+            }}
+          >
+            <item.icon size={24} />
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+    </>
   );
 };
 

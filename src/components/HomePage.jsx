@@ -59,6 +59,62 @@ const GLOBAL_CSS = `
 
   .font-ui { font-family: 'Cabinet Grotesk', sans-serif; }
 
+  /* ── RESPONSIVE UTILS ── */
+  .hp-hero-title {
+    font-family: 'Cabinet Grotesk', sans-serif; fontWeight: 800;
+    font-size: clamp(2.5rem, 8vw, 5rem); lineHeight: 1.05; letter-spacing: -0.03em;
+    color: var(--txt1);
+  }
+  .hp-hero-stats {
+    display: flex; gap: 5rem; justify-content: center; 
+    border-top: 1px solid var(--bdr); padding: 4rem 1rem;
+    margin-top: 2rem;
+  }
+  .stat-val { font-size: clamp(2rem, 5vw, 3.5rem); fontWeight: 800; color: var(--txt1); letterSpacing: -0.02em; }
+  .stat-lbl { font-size: 0.85rem; color: var(--txt3); fontWeight: 500; marginTop: 0.3rem; }
+
+  @media (max-width: 768px) {
+    .hp-hero-stats { flex-direction: row; gap: 0.5rem; justify-content: space-between; padding: 2.5rem 0; width: 100%; }
+    .stat-val { font-size: 1.6rem !important; }
+    .stat-lbl { font-size: 0.65rem !important; margin-top: 0.1rem; }
+    .spotlight-card { min-width: 320px; height: 460px; }
+    .spotlight-title { font-size: 1.75rem; }
+    .spotlight-info { padding: 25px; }
+    .hp-upload-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
+    .hp-upload-zone { height: 350px !important; }
+    
+    .hp-filter-scroller {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; -ms-overflow-style: none;
+      display: flex; gap: 0.8rem; padding: 0.5rem 0 1.5rem;
+      mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+      -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+    }
+    .hp-filter-scroller::-webkit-scrollbar { display: none; }
+
+    /* MOBILE SCROLL PROGRESS */
+    .hp-mobile-progress {
+      position: fixed; top: 0; left: 0; height: 3px; z-index: 10001;
+      background: linear-gradient(90deg, #F5A623, #2DD4BF, #F5A623);
+      width: 0%; transition: width 0.1s linear;
+      box-shadow: 0 0 10px rgba(245, 166, 35, 0.5);
+    }
+    
+    /* TOUCH RIPPLE */
+    .hp-touch-glow {
+      position: fixed; pointer-events: none; z-index: 10002;
+      width: 50px; height: 50px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 80%);
+      transform: translate(-50%, -50%) scale(1); opacity: 0;
+      transition: opacity 0.2s, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hp-touch-glow.active { transform: translate(-50%, -50%) scale(1.6); }
+  }
+  @media (max-width: 480px) {
+    .spotlight-card { min-width: 280px; height: 400px; }
+    .hp-hero-badge { letter-spacing: 0.1em !important; font-size: 0.65rem !important; padding: 0.3rem 0.8rem !important; }
+  }
+
   /* ── FadeUp keyframe ── */
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -597,6 +653,11 @@ const GLOBAL_CSS = `
   }
   .hp-cursor-ring, .hp-cursor-trail, .hp-cursor-ping { display: none !important; }
 
+  @media (max-width: 1024px) {
+    .hp-cursor-dot, .hp-cursor-trail { display: none !important; }
+    * { cursor: auto !important; }
+  }
+
   .hp-cursor-trail {
     position: fixed;
     top: 0; left: 0;
@@ -801,7 +862,7 @@ const GLOBAL_CSS = `
 /* ─────────────────────────────────────────────
    CONSTANTS
 ───────────────────────────────────────────── */
-const FILTERS = ["ALL", "LANDSCAPE", "PORTRAIT", "ABSTRACT", "ARCHITECTURE", "MACRO", "CINEMATIC", "SPACE"];
+const FILTERS = ["ALL CATEGORIES", "LANDSCAPE", "PORTRAIT", "ABSTRACT", "ARCHITECTURE", "MACRO", "CINEMATIC", "SPACE"];
 const AI_MODELS = ["Midjourney V6", "Midjourney V5.2", "DALL-E 3", "Stable Diffusion XL", "Leonardo.ai", "Adobe Firefly", "Magnific AI"];
 const MARQUEE_ITEMS = ["CINEMATIC LONG SHOT", "HYPER REALISTIC", "SOFT BOKEH", "CONCEPT ART", "EDITORIAL PHOTOGRAPHY", "NEON NOIR", "BRUTALIST ARCHITECTURE", "MACRO DETAIL", "WIDE ANGLE", "FILM GRAIN", "8K RESOLUTION", "AWARD-WINNING"];
 
@@ -902,18 +963,14 @@ function Hero({ totalCount }) {
       <div style={{ position: "relative", zIndex: 1, maxWidth: "900px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
         {/* EyeBrow */}
         <div style={{ animation: "fadeUp 0.5s ease both", animationDelay: "0s", marginBottom: "1rem" }}>
-          <span className="hp-badge" style={{ fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", padding: "0.4rem 1rem" }}>
+          <span className="hp-hero-badge" style={{ fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", padding: "0.4rem 1rem", borderRadius: '100px' }}>
             Community Prompt Studio & Gallery
           </span>
         </div>
 
         {/* Headline */}
         <div style={{ animation: "fadeUp 0.55s ease both", animationDelay: "0.08s", marginBottom: "1.2rem" }}>
-          <h1 style={{
-            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800,
-            fontSize: "clamp(3rem, 7vw, 5rem)", lineHeight: 1.05, letterSpacing: "-0.03em",
-            color: "var(--txt1)"
-          }}>
+          <h1 className="hp-hero-title">
             Share the prompts<br />behind the art.
           </h1>
         </div>
@@ -929,15 +986,15 @@ function Hero({ totalCount }) {
         </div>
 
         {/* Stats */}
-        <div style={{ animation: "fadeUp 0.6s ease both", animationDelay: "0.32s", display: "flex", gap: "5rem", justifyContent: "center", borderTop: "1px solid var(--bdr)", paddingTop: "4rem" }}>
+        <div className="hp-hero-stats" style={{ animation: "fadeUp 0.6s ease both", animationDelay: "0.32s" }}>
           {[
             [totalCount || "10K+", "Prompts Shared"],
             ["240", "Active Creators"],
             ["50K", "Community Saves"]
           ].map(([val, lbl]) => (
             <div key={lbl} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "3rem", fontWeight: 800, color: "var(--txt1)", letterSpacing: "-0.02em" }}>{val}</div>
-              <div style={{ fontSize: "0.85rem", color: "var(--txt3)", fontWeight: 500, marginTop: "0.3rem" }}>{lbl}</div>
+              <div className="stat-val">{val}</div>
+              <div className="stat-lbl">{lbl}</div>
             </div>
           ))}
         </div>
@@ -1218,7 +1275,7 @@ function UploadView({ onBack }) {
         <p style={{ color: "var(--txt2)", fontSize: "1.1rem" }}>Share your AI-generated fashion masterpieces with the world.</p>
       </div>
 
-      <form onSubmit={handleUpload} style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "3rem" }}>
+      <form onSubmit={handleUpload} className="hp-upload-grid" style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: "3rem" }}>
         {/* Left: Upload Area */}
         <div>
           <label className="hp-upload-zone" style={{
@@ -1449,13 +1506,13 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
     <div ref={ref} className="hp-fade spotlight-section">
       <div className="spotlight-glow" />
 
-      <div style={{ padding: "0 2.5rem 4rem", maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 5 }}>
+      <div style={{ padding: "0 2.5rem 4rem", maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 5, flexWrap: 'wrap', gap: '2rem' }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <span style={{ width: "40px", height: "1px", background: "rgba(255,255,255,0.3)" }} />
             <span style={{ fontSize: "0.8rem", fontWeight: 800, color: "#FFF", letterSpacing: "0.4em", textTransform: "uppercase", opacity: 0.6 }}>The Curated List</span>
           </div>
-          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(3.5rem, 8vw, 5.5rem)", color: "#FFF", letterSpacing: "-0.05em", lineHeight: 0.9 }}>
+          <h2 style={{ fontFamily: "'Syne', sans-serif", fontWeight: 900, fontSize: "clamp(2.5rem, 8vw, 5.5rem)", color: "#FFF", letterSpacing: "-0.05em", lineHeight: 0.9 }}>
             SPOTLIGHT<br /><span style={{ color: "transparent", WebkitTextStroke: "1px rgba(255,255,255,0.3)" }}>GALLERY</span>
           </h2>
         </div>
@@ -1463,9 +1520,9 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
           onClick={onViewAll}
           className="hp-btn-ghost"
           style={{
-            padding: "1rem 2.5rem",
+            padding: "1rem 2rem",
             borderRadius: "100px",
-            fontSize: "0.85rem",
+            fontSize: "0.8rem",
             background: "rgba(255,255,255,0.03)",
             borderColor: "rgba(255,255,255,0.1)"
           }}
@@ -1843,16 +1900,40 @@ export default function PromptGallery() {
   const { token } = useAuth();
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("ALL");
+  const [filter, setFilter] = useState("ALL CATEGORIES");
   const [query, setQuery] = useState("");
   const [modal, setModal] = useState(null);
   const [authModal, setAuthModal] = useState(false);
   const [view, setView] = useState("GALLERY"); // "GALLERY", "COLLECTIONS", "WISHLIST", "STUDIO", "TRENDING", "UPLOAD"
   const [toast, showToast] = useToast();
 
+  const [scrollPct, setScrollPct] = useState(0);
+  const [touchPos, setTouchPos] = useState({ x: 0, y: 0, show: false });
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [view]);
+    const handleScroll = () => {
+      const h = document.documentElement, b = document.body;
+      const st = h.scrollTop || b.scrollTop;
+      const sh = h.scrollHeight || b.scrollHeight;
+      setScrollPct((st / (sh - h.clientHeight)) * 100);
+    };
+    const handleTouch = (e) => {
+      const t = e.touches ? e.touches[0] : e;
+      setTouchPos({ x: t.clientX, y: t.clientY, show: true });
+    };
+    const handleTouchEnd = () => setTouchPos(p => ({ ...p, show: false }));
+
+    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("touchmove", handleTouch, { passive: true });
+    window.addEventListener("touchstart", handleTouch, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("touchmove", handleTouch);
+      window.removeEventListener("touchstart", handleTouch);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
 
   /* Inject global CSS once */
   useEffect(() => {
@@ -1864,9 +1945,16 @@ export default function PromptGallery() {
 
   /* Fetch data */
   useEffect(() => {
+    console.log("Fetching from:", `${config.API_BASE_URL}/category`);
     axios.get(`${config.API_BASE_URL}/category`)
-      .then(res => setPrompts(res.data))
-      .catch(err => console.error("Fetch failed", err))
+      .then(res => {
+        console.log("Success:", res.data);
+        setPrompts(res.data);
+      })
+      .catch(err => {
+        console.error("Fetch failed!", err.message);
+        console.error("Full Error details:", err);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -1887,7 +1975,7 @@ export default function PromptGallery() {
   const filtered = useMemo(() => {
     const pArr = Array.isArray(prompts) ? prompts : [];
     return pArr.filter(p => {
-      const matchFilter = filter === "ALL" || filter === "ALL" || (p.tags || []).some(t => t.toLowerCase() === filter.toLowerCase());
+      const matchFilter = filter === "ALL" || filter === "ALL CATEGORIES" || (p.tags || []).some(t => t.toLowerCase() === filter.toLowerCase());
       const matchQuery = !query || (p.title || "").toLowerCase().includes(query.toLowerCase())
         || (p.prompt && p.prompt.toLowerCase().includes(query.toLowerCase()))
         || (p.tags || []).some(t => t.toLowerCase().includes(query.toLowerCase()));
@@ -1911,6 +1999,10 @@ export default function PromptGallery() {
 
   return (
     <div style={{ background: "var(--bg1)", color: "var(--txt1)", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+      {/* Mobile Unique Elements */}
+      <div className="hp-mobile-progress" style={{ width: `${scrollPct}%` }} />
+      <div className={`hp-touch-glow ${touchPos.show ? 'active' : ''}`} style={{ left: touchPos.x, top: touchPos.y, opacity: touchPos.show ? 1 : 0 }} />
+
       <Navbar currentView={view} onView={handleViewChange} query={query} setQuery={setQuery} onAuthModal={setAuthModal} />
 
       {/* ─── GALLERY VIEW ─── */}
@@ -1926,18 +2018,21 @@ export default function PromptGallery() {
 
           {/* Filter tabs */}
           <div style={{ padding: "1.5rem 2.5rem 0", maxWidth: 1320, margin: "0 auto" }}>
-            <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap", alignItems: "center" }}>
+            <div className="hp-filter-scroller">
               {FILTERS.map(f => (
                 <button
                   key={f}
                   className={`hp-filter-tab ${filter === f ? "active" : ""}`}
                   onClick={() => setFilter(f)}
+                  style={{ flexShrink: 0 }}
                 >
                   {f}
                 </button>
               ))}
-              <span style={{ marginLeft: "auto", fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: "0.78rem", color: "var(--txt3)", fontWeight: 600 }}>
-                {filtered.length} results
+            </div>
+            <div style={{ padding: '0.5rem 0' }}>
+              <span style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: "0.78rem", color: "var(--txt3)", fontWeight: 600 }}>
+                Showing {filtered.length} curated prompts
               </span>
             </div>
           </div>
