@@ -862,7 +862,7 @@ const GLOBAL_CSS = `
 /* ─────────────────────────────────────────────
    CONSTANTS
 ───────────────────────────────────────────── */
-const FILTERS = ["ALL CATEGORIES", "LANDSCAPE", "PORTRAIT", "ABSTRACT", "ARCHITECTURE", "MACRO", "CINEMATIC", "SPACE"];
+const FILTERS = ["ALL", "LANDSCAPE", "PORTRAIT", "ABSTRACT", "ARCHITECTURE", "MACRO", "CINEMATIC", "SPACE"];
 const AI_MODELS = ["Midjourney V6", "Midjourney V5.2", "DALL-E 3", "Stable Diffusion XL", "Leonardo.ai", "Adobe Firefly", "Magnific AI"];
 const MARQUEE_ITEMS = ["CINEMATIC LONG SHOT", "HYPER REALISTIC", "SOFT BOKEH", "CONCEPT ART", "EDITORIAL PHOTOGRAPHY", "NEON NOIR", "BRUTALIST ARCHITECTURE", "MACRO DETAIL", "WIDE ANGLE", "FILM GRAIN", "8K RESOLUTION", "AWARD-WINNING"];
 
@@ -1900,7 +1900,7 @@ export default function PromptGallery() {
   const { token } = useAuth();
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("ALL CATEGORIES");
+  const [filter, setFilter] = useState("ALL");
   const [query, setQuery] = useState("");
   const [modal, setModal] = useState(null);
   const [authModal, setAuthModal] = useState(false);
@@ -1975,7 +1975,7 @@ export default function PromptGallery() {
   const filtered = useMemo(() => {
     const pArr = Array.isArray(prompts) ? prompts : [];
     return pArr.filter(p => {
-      const matchFilter = filter === "ALL" || filter === "ALL CATEGORIES" || (p.tags || []).some(t => t.toLowerCase() === filter.toLowerCase());
+      const matchFilter = filter === "ALL" || filter === "ALL" || (p.tags || []).some(t => t.toLowerCase() === filter.toLowerCase());
       const matchQuery = !query || (p.title || "").toLowerCase().includes(query.toLowerCase())
         || (p.prompt && p.prompt.toLowerCase().includes(query.toLowerCase()))
         || (p.tags || []).some(t => t.toLowerCase().includes(query.toLowerCase()));
