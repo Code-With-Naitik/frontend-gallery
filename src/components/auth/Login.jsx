@@ -20,7 +20,6 @@ const Login = () => {
       setLoading(true);
       try {
         const res = await axios.post(`${config.API_BASE_URL}/auth/login`, { email, password });
-        adminLogout(); // Enforce strict isolation
         userLogin(res.data.token, res.data.user);
         navigate('/');
     } catch (err) {
@@ -33,7 +32,7 @@ const Login = () => {
   return (
     <div style={{ 
       minHeight: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-      padding: '2rem', fontFamily: "'Cabinet Grotesk', sans-serif" 
+      padding: '6rem 2rem 2rem 2rem', fontFamily: "'Cabinet Grotesk', sans-serif" 
     }}>
       {/* Background decoration */}
       <div style={{ position: 'fixed', top: '10%', right: '10%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%)', pointerEvents: 'none' }} />

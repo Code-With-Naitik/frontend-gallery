@@ -12,7 +12,10 @@ const ProtectedRoute = ({ children }) => {
     const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname === '/users';
 
     if (isAdminRoute) {
-        if (!adminToken || admin?.role !== 'admin') {
+        const isSystemAdmin = adminToken && admin?.role === 'admin';
+        const isUserAdmin = token && user?.role === 'admin';
+        
+        if (!isSystemAdmin && !isUserAdmin) {
             return <Navigate to="/admin/login" replace />;
         }
     } else {

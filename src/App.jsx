@@ -13,7 +13,7 @@ import ProfilePage from './components/ProfilePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
-import CustomCursor from './components/CustomCursor';
+
 import './App.css';
 import Navbar from './components/Navbar';
 
@@ -24,7 +24,7 @@ function App() {
         <Router>
           <Navbar />
           <div className="App">
-            <CustomCursor />
+
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<Login />} />

@@ -1,76 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { 
+    Users, Plus, Search, Trash2, Edit2, ArrowRight, Activity, 
+    ShieldAlert, CheckCircle, RefreshCcw, LayoutGrid, User, LogOut, Cpu,
+    Home, Settings, ChevronRight
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { User, Plus, LogOut, Home, Compass, ShieldCheck, ExternalLink, Search, Trash2, Edit3, CheckCircle, Clock } from 'lucide-react';
+import { useNavigate, NavLink, Link } from 'react-router-dom';
 import config from '../url/config';
 
 const UserManagement = () => {
-    const { admin, adminToken, adminLogout } = useAuth();
+    const { adminToken, adminLogout, admin } = useAuth();
     const navigate = useNavigate();
-
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
-    const [formData, setFormData] = useState({ username: '', email: '', password: '' });
-    const [stats, setStats] = useState({ users: 0 });
+    const [formData, setFormData] = useState({ username: '', email: '', password: '', role: 'user' });
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        fetchData();
+    }, []);
 
     const fetchData = async () => {
-        if (!adminToken) return;
         setLoading(true);
-        setError('');
         try {
-            const uRes = await axios.get(`${config.API_BASE_URL}/auth/users`, {
+            const res = await axios.get(`${config.API_BASE_URL}/auth/users`, {
                 headers: { Authorization: `Bearer ${adminToken}` }
             });
-            setUsers(uRes.data);
-            setStats({ users: uRes.data.length });
+            setUsers(res.data);
         } catch (err) {
-            setError('Identity synchronization failed. Re-authentication required.');
+            setError('System link failed. Redirecting...');
+            if (err.response?.status === 401 || err.response?.status === 403) {
+                setTimeout(() => navigate('/admin/login'), 2000);
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, [adminToken]);
-
-    const handleSubmit = async (e) => {
+    const handleCreate = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
-
-        if (!formData.username.trim() || !formData.email.trim() || !formData.password.trim()) {
-            setError('Please fill all fields.');
-            return;
-        }
-
         try {
             await axios.post(`${config.API_BASE_URL}/auth/register`, {
                 username: formData.username.trim(),
                 email: formData.email.trim().toLowerCase(),
-                password: formData.password
+                password: formData.password,
+                role: formData.role
             });
-            setFormData({ username: '', email: '', password: '' });
-            setSuccess('User registered successfully.');
+            setFormData({ username: '', email: '', password: '', role: 'user' });
+            setSuccess('Protocol established successfully.');
             fetchData();
+            setTimeout(() => setSuccess(''), 3000);
         } catch (err) {
-            setError(err.response?.data?.error || 'Create user failed.');
-        }
-    };
-
-    const handleDelete = async (mongoId) => {
-        if (!window.confirm('Are you sure you want to terminate this user protocol?')) return;
-        try {
-            await axios.delete(`${config.API_BASE_URL}/auth/users/${mongoId}`, {
-                headers: { Authorization: `Bearer ${adminToken}` }
-            });
-            setSuccess('User protocol successfully terminated.');
-            fetchData();
-        } catch (err) {
-            setError(err.response?.data?.error || 'Deletion failed.');
+            setError(err.response?.data?.error || 'Registration failed.');
         }
     };
 
@@ -82,205 +68,221 @@ const UserManagement = () => {
             });
             fetchData();
         } catch (err) {
-            setError('Failed to update status protocol.');
+            setError('Status update failed.');
         }
     };
 
-    const loginAsUser = (email) => {
-        navigate('/login', { state: { email } });
+    const toggleRole = async (mongoId, currentRole) => {
+        const newRole = currentRole === 'admin' ? 'user' : 'admin';
+        try {
+            await axios.patch(`${config.API_BASE_URL}/auth/users/${mongoId}/role`, { role: newRole }, {
+                headers: { Authorization: `Bearer ${adminToken}` }
+            });
+            fetchData();
+        } catch (err) {
+            setError('Role update failed.');
+        }
     };
 
-    const sidebarCss = `
-        .sidebar { width: 260px; background: #09090b; border-right: 1px solid rgba(255,255,255,.05); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
-        .sidebar-brand { height: 72px; padding: 0 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.05); color: #fff; font-weight: 800; font-size: 1.05rem; }
-        .sidebar-nav { flex: 1; padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; text-decoration: none; color: #71717a; font-size: 0.875rem; font-weight: 600; transition: all .2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
-        .nav-item:hover { background: rgba(255,255,255,.05); color: #fff; }
-        .nav-item.active { background: rgba(139,92,246,.1); color: #8b5cf6; }
-        .logout-btn { margin: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(239,68,68,.08); color: #ef4444; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; transition: .2s; }
-        .logout-btn:hover { background: rgba(239,68,68,.15); }
+    const deleteUser = async (id) => {
+        if (!window.confirm('Erase this identity from the core?')) return;
+        try {
+            await axios.delete(`${config.API_BASE_URL}/auth/users/${id}`, {
+                headers: { Authorization: `Bearer ${adminToken}` }
+            });
+            setSuccess('Indentity purged.');
+            fetchData();
+            setTimeout(() => setSuccess(''), 3000);
+        } catch (err) {
+            setError('Erase protocol failed.');
+        }
+    };
+
+    const handleLogout = () => {
+        adminLogout();
+        navigate('/admin/login');
+    };
+
+    const filteredUsers = users.filter(u => 
+        u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    const css = `
+        @import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
         
-        @media (max-width: 1024px) {
-            .sidebar { display: none; }
-            .um-main-header { padding: 0 1.5rem !important; }
-            .um-content { padding: 2rem 1.5rem !important; }
-            .um-form-grid { grid-template-columns: 1fr !important; gap: 1rem !important; }
-            .um-title { font-size: 1.8rem !important; }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --bg: #000;
+            --panel: #0a0a0c;
+            --surface: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #fff;
+            --text-muted: rgba(255, 255, 255, 0.4);
+            --sidebar-w: 260px;
+            --easing: cubic-bezier(0.16, 1, 0.3, 1);
         }
+
+        body {
+            font-family: 'Cabinet Grotesk', sans-serif;
+            background: var(--bg); color: #fff;
+            -webkit-font-smoothing: antialiased; overflow-x: hidden;
+        }
+
+        .layout { display: flex; min-height: 100vh; }
+        .noise { position: fixed; inset: 0; background: url("https://grainy-gradients.vercel.app/noise.svg"); opacity: 0.04; pointer-events: none; z-index: 9999; mix-blend-mode: overlay; }
+
+        .mobile-dock {
+            display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 15, 18, 0.8); backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; padding: 8px; z-index: 2000; gap: 8px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .dock-item { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-decoration: none; transition: 0.3s; }
+        .dock-item.active { background: #fff; color: #000; }
+
+        .sidebar {
+            width: var(--sidebar-w); background: var(--panel); border-right: 1px solid var(--border);
+            display: flex; flex-direction: column; position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000;
+        }
+        .sidebar-head { padding: 32px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; cursor: Pointer; text-decoration: none; color: #fff; }
+        .sys-logo { width: 32px; height: 32px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; }
+        .sys-name { font-weight: 900; font-size: 1.1rem; letter-spacing: -0.05em; }
+
+        .sidebar-nav { padding: 24px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: var(--text-muted); text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
+        .nav-btn:hover { color: #fff; background: var(--surface); }
+        .nav-btn.active { color: #fff; background: rgba(255,255,255,0.06); border: 1px solid var(--border); }
+
+        .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; width: 100%; transition: margin 0.3s var(--easing); }
+        .top-bar { height: 80px; padding: 0 40px; border-bottom: 1px solid var(--border); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+        .search-box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 100px; padding: 8px 16px; display: flex; align-items: center; gap: 10px; width: 100%; max-width: 300px; }
+
+        .content { padding: 60px 40px; width: 100%; max-width: 1400px; margin: 0 auto; }
+        .page-header { margin-bottom: 60px; }
+        .page-title { font-size: clamp(2.2rem, 8vw, 4rem); font-weight: 950; letter-spacing: -0.06em; line-height: 1; margin-bottom: 12px; }
+        .page-desc { color: var(--text-muted); font-size: 1rem; font-weight: 500; }
+
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 2.5fr; gap: 40px; }
+        .form-card { background: var(--panel); border: 1px solid var(--border); border-radius: 32px; padding: 40px; position: sticky; top: 120px; }
+        
+        .btn-init { width: 100%; padding: 16px; border-radius: 100px; background: #fff; color: #000; font-weight: 950; border: none; cursor: Pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; }
+        .btn-init:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(255,255,255,0.2); }
+
+        .table-card { background: var(--panel); border: 1px solid var(--border); border-radius:32px; padding: 32px; overflow: hidden; }
+        .table-wrap { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 16px; font-size: 10px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 20px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        
+        .role-badge { display: inline-flex; align-items: center; padding: 4px 10px; border-radius: 8px; font-size: 10px; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .role-admin { background: #fff; color: #000; }
+        .role-user { background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--border); }
+
+        .status-pill { padding: 4px 12px; border-radius: 100px; font-size: 10px; font-weight: 800; text-transform: uppercase; cursor: pointer; width: fit-content; }
+        .status-active { background: rgba(34, 197, 94, 0.1); color: #4ade80; border: 1px solid rgba(34,197,94,0.2); }
+        .status-pending { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+        .act-btn { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border); color: var(--text-muted); transition: 0.2s; cursor: pointer; }
+        .act-btn:hover { background: #fff; color: #000; border-color: #fff; }
+
+        @media (max-width: 1024px) { .sidebar { display: none; } .mobile-dock { display: flex; } .main { margin-left: 0; padding-bottom: 120px; } .top-bar { padding: 0 20px; } .dashboard-grid { grid-template-columns: 1fr; } .form-card { position: static; margin-bottom: 30px; } .table-head { flex-direction: column; align-items: flex-start; gap: 20px; } }
     `;
 
     return (
-        <div style={{ background: '#05060b', minHeight: '100vh', color: '#e2e8f0', display: 'flex' }}>
-            <style>{sidebarCss}</style>
-            
+        <div className="layout">
+            <style>{css}</style>
+            <div className="noise" />
+
+            {/* Mobile Dock */}
+            <div className="mobile-dock">
+                <NavLink to="/admin" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><LayoutGrid size={22} /></NavLink>
+                <NavLink to="/users" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><Users size={22} /></NavLink>
+                <NavLink to="/admin/profile" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><User size={22} /></NavLink>
+                <button onClick={handleLogout} className="dock-item" style={{ background: 'none', border: 'none' }}><LogOut size={22} color="#ef4444" /></button>
+            </div>
+
             <aside className="sidebar">
-                <div className="sidebar-brand">
-                    <Home size={20} />
-                    <span>Prompt Core</span>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#8b5cf6', marginLeft: 'auto', boxShadow: '0 0 10px #8b5cf6' }} />
-                </div>
-
+                <Link to="/" className="sidebar-head">
+                    <div className="sys-logo"><Cpu size={18} /></div>
+                    <span className="sys-name">BANANA <span style={{ opacity: 0.4 }}>CORE</span></span>
+                </Link>
                 <nav className="sidebar-nav">
-                    <button onClick={() => navigate('/admin')} className="nav-item">
-                        <Compass size={18} /><span>Collections</span>
-                    </button>
-                    <button className="nav-item active">
-                        <User size={18} /><span>Users</span>
-                    </button>
-                    <button onClick={() => navigate('/admin/profile')} className="nav-item">
-                        <ShieldCheck size={18} /><span>Profile</span>
-                    </button>
-                </nav>
+                    <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-btn active' : 'nav-btn'}><LayoutGrid size={18} /><span>Manager</span></NavLink>
+                    <NavLink to="/users" className={({ isActive }) => isActive ? 'nav-btn active' : 'nav-btn'}><Users size={18} /><span>Directory</span></NavLink>
+                    <NavLink to="/admin/profile" className={({ isActive }) => isActive ? 'nav-btn active' : 'nav-btn'}><User size={18} /><span>Profile</span></NavLink>
 
-                <button onClick={() => { adminLogout(); navigate('/admin/login'); }} className="logout-btn">
-                    <LogOut size={16} /> Logout
-                </button>
+                    <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--border)' }}>
+                        <button onClick={handleLogout} className="nav-btn" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
+                            <LogOut size={18} /><span>Logout</span>
+                        </button>
+                    </div>
+                </nav>
             </aside>
 
-            <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <header className="um-main-header" style={{
-                    height: 72, borderBottom: '1px solid rgba(255,255,255,0.05)',
-                    display: 'flex', alignItems: 'center', padding: '0 2.5rem',
-                    background: 'rgba(5,6,11,0.5)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 10
-                }}>
-
-                    <div style={{ padding: '0 0.5rem', color: '#64748b', fontSize: '0.85rem', fontWeight: 600 }}>
-                        ADMINISTRATOR ACCESS GRANTED
+            <main className="main">
+                <header className="top-bar">
+                    <div className="search-box">
+                        <Search size={16} color="var(--text-muted)" />
+                        <input 
+                            type="text" 
+                            placeholder="Find node handle..." 
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.8rem', outline: 'none' }} 
+                        />
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.6)' }}>{admin?.username}</span>
+                        <NavLink to="/admin/profile" style={{ padding: '3px', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', overflow: 'hidden' }}>
+                            {admin?.profilePic ? (
+                                <img src={admin.profilePic} alt="admin" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '28px', height: '28px', background: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <User size={16} color="#000" />
+                                </div>
+                            )}
+                        </NavLink>
                     </div>
                 </header>
 
-                <div className="um-content" style={{ padding: '2.5rem 3rem', flex: 1 }}>
-                    <div style={{ marginBottom: '2.5rem' }}>
-                        <h1 className="um-title" style={{ 
-                            fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: '2.4rem', fontWeight: 900, 
-                            letterSpacing: '-0.02em', color: '#fff', margin: 0 
-                        }}>
-
-                            User Management
-                        </h1>
-                        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '0.5rem' }}>
-                            {stats.users} active user protocols established in the database.
-                        </p>
+                <div className="content">
+                    <div className="page-header">
+                        <h1 className="page-title">Identity Directory</h1>
+                        <p className="page-desc">System access control and endpoint management.</p>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2.5rem' }}>
-                        <div style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 24, padding: '2rem', background: 'rgba(30,41,59,0.2)' }}>
-                            <div style={{ marginBottom: '2rem' }}>
-                                <h2 style={{ margin: 0, color: '#fff', fontSize: '1.4rem', fontWeight: 700 }}>Onboard New Client</h2>
-                                <p style={{ color: '#94a3b8', marginTop: '0.4rem', fontSize: '0.9rem' }}>Create a standard user account for the gallery ecosystem.</p>
-                            </div>
-
-                            {(error || success) && (
-                                <div style={{ marginBottom: '1.5rem', padding: '0.9rem 1.25rem', borderRadius: 14, background: error ? 'rgba(239,68,68,.1)' : 'rgba(34,197,94,.1)', border: `1px solid ${error ? 'rgba(239,68,68,.2)' : 'rgba(34,197,94,.2)'}` }}>
-                                    <span style={{ color: error ? '#f87171' : '#4ade80', fontWeight: 600, fontSize: '0.9rem' }}>{error || success}</span>
-                                </div>
-                            )}
-
-                            <form onSubmit={handleSubmit} className="um-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '1.25rem', alignItems: 'end' }}>
-
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Username</label>
-                                    <input
-                                        type="text"
-                                        value={formData.username}
-                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                        placeholder="User alias"
-                                        style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,.08)', background: '#0a0b12', color: '#fff', padding: '0.85rem 1.1rem', outline: 'none' }}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email Secure</label>
-                                    <input
-                                        type="email"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        placeholder="email@domain.com"
-                                        style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,.08)', background: '#0a0b12', color: '#fff', padding: '0.85rem 1.1rem', outline: 'none' }}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label style={{ display: 'block', marginBottom: '0.6rem', color: '#94a3b8', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Initial Password</label>
-                                    <input
-                                        type="password"
-                                        value={formData.password}
-                                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        placeholder="Security credentials"
-                                        style={{ width: '100%', borderRadius: 12, border: '1px solid rgba(255,255,255,.08)', background: '#0a0b12', color: '#fff', padding: '0.85rem 1.1rem', outline: 'none' }}
-                                        required
-                                    />
-                                </div>
-                                <button type="submit" style={{ borderRadius: 12, border: 'none', background: '#fff', color: '#000', fontWeight: 800, padding: '0.85rem 1.8rem', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 8, transition: '0.3s' }}>
-                                    <Plus size={18} /> Create Account
-                                </button>
+                    <div className="dashboard-grid">
+                        <div className="form-card">
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '32px' }}>Initialize Node</h3>
+                            <form onSubmit={handleCreate}>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Identity Alias</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="text" placeholder="username" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Endpoint Mail</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="email" placeholder="mail@system.io" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Secret Cipher</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Access Level</label><select style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none', appearance: 'none' }} value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}><option value="user" style={{ background: '#0a0a0c' }}>Standard User</option><option value="admin" style={{ background: '#0a0a0c' }}>Administrator</option></select></div>
+                                <button type="submit" className="btn-init"><span>Deploy Node</span><ArrowRight size={18} /></button>
                             </form>
+                            {(success || error) && <div style={{ marginTop: '20px', color: success ? '#4ade80' : '#f87171', fontSize: '0.8rem', fontWeight: 700 }}>{success || error}</div>}
                         </div>
 
-                        <div style={{ border: '1px solid rgba(255,255,255,0.06)', borderRadius: 24, padding: '2rem', background: 'rgba(30,41,59,0.1)', backdropFilter: 'blur(10px)' }}>
-                            <h3 style={{ color: '#fff', marginTop: 0, fontSize: '1.2rem', marginBottom: '1.5rem', fontWeight: 700 }}>Account Directory</h3>
-                            {loading ? (
-                                <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>Establishing secure connection...</div>
-                            ) : (
-                                <div style={{ overflowX: 'auto' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                        <thead>
-                                            <tr>
-                                                <th style={{ textAlign: 'left', padding: '1.2rem 1rem', borderBottom: '1px solid rgba(255,255,255,.06)', color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800 }}>Protocol ID</th>
-                                                <th style={{ textAlign: 'left', padding: '1.2rem 1rem', borderBottom: '1px solid rgba(255,255,255,.06)', color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800 }}>Alias</th>
-                                                <th style={{ textAlign: 'left', padding: '1.2rem 1rem', borderBottom: '1px solid rgba(255,255,255,.06)', color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800 }}>Identity Email</th>
-                                                <th style={{ textAlign: 'center', padding: '1.2rem 1rem', borderBottom: '1px solid rgba(255,255,255,.06)', color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800 }}>Status</th>
-                                                <th style={{ textAlign: 'center', padding: '1.2rem 1rem', borderBottom: '1px solid rgba(255,255,255,.06)', color: '#64748b', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 800 }}>Control Actions</th>
+                        <div className="table-card">
+                            <h3 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '32px', display: 'flex', alignItems: 'center', gap: '10px' }}><Activity size={20} /><span>Registry Status</span></h3>
+                            <div className="table-wrap">
+                                <table>
+                                    <thead><tr><th>Alias</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+                                    <tbody>
+                                        {filteredUsers.map(u => (
+                                            <tr key={u.id} className="tr-row">
+                                                <td><div style={{ fontWeight: 800, fontSize: '1rem' }}>{u.username}</div><div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</div></td>
+                                                <td><div className={`role-badge ${u.role === 'admin' ? 'role-admin' : 'role-user'}`} onClick={() => toggleRole(u.mongoId || u.id, u.role)}>{u.role === 'admin' ? 'ADMIN' : 'USER'}</div></td>
+                                                <td><div className={`status-pill ${u.status === 'active' ? 'status-active' : 'status-pending'}`} onClick={() => toggleStatus(u.mongoId || u.id, u.status)}>{u.status}</div></td>
+                                                <td><button className="act-btn" onClick={() => deleteUser(u.mongoId || u.id)}><Trash2 size={16} /></button></td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            {users.length ? users.map((u) => (
-                                                <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,.03)', transition: '0.2s' }}>
-                                                    <td style={{ padding: '1.2rem 1rem', color: '#64748b', fontSize: '0.75rem', fontFamily: 'monospace' }}>#{String(u.id).padStart(4, '0')}</td>
-                                                    <td style={{ padding: '1.2rem 1rem', color: '#fff', fontSize: '0.9rem', fontWeight: 600 }}>{u.username}</td>
-                                                    <td style={{ padding: '1.2rem 1rem', color: '#94a3b8', fontSize: '0.9rem' }}>{u.email}</td>
-                                                    <td style={{ padding: '1.2rem 1rem', textAlign: 'center' }}>
-                                                        <div 
-                                                            onClick={() => toggleStatus(u.mongoId, u.status)}
-                                                            style={{ 
-                                                                display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 20, 
-                                                                fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer',
-                                                                background: u.status === 'active' ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
-                                                                color: u.status === 'active' ? '#4ade80' : '#fbbf24',
-                                                                border: `1px solid ${u.status === 'active' ? 'rgba(34,197,94,0.2)' : 'rgba(245,158,11,0.2)'}`,
-                                                                transition: '0.3s'
-                                                            }}
-                                                        >
-                                                            {u.status === 'active' ? <CheckCircle size={12} /> : <Clock size={12} />}
-                                                            {u.status}
-                                                        </div>
-                                                    </td>
-                                                    <td style={{ padding: '1.2rem 1rem', textAlign: 'center' }}>
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
-                                                            <button 
-                                                                onClick={() => loginAsUser(u.email)} 
-                                                                title="Edit Profile"
-                                                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', borderRadius: 8, cursor: 'pointer', padding: '0.5rem', display: 'flex', transition: '0.2s' }}
-                                                            >
-                                                                <Edit3 size={16} />
-                                                            </button>
-                                                            <button 
-                                                                onClick={() => handleDelete(u.mongoId)} 
-                                                                title="Delete User"
-                                                                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', borderRadius: 8, cursor: 'pointer', padding: '0.5rem', display: 'flex', transition: '0.2s' }}
-                                                            >
-                                                                <Trash2 size={16} />
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )) : (
-                                                <tr><td colSpan="5" style={{ padding: '3rem', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>No user records found in current sector.</td></tr>
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>

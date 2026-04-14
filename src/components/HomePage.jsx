@@ -36,7 +36,7 @@ const GLOBAL_CSS = `
     font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    cursor: none !important; /* Hide default cursor */
+    cursor: default;
   }
 
   /* ── UNIQUE GRAIN OVERLAY ── */
@@ -61,17 +61,39 @@ const GLOBAL_CSS = `
 
   /* ── RESPONSIVE UTILS ── */
   .hp-hero-title {
-    font-family: 'Cabinet Grotesk', sans-serif; fontWeight: 800;
-    font-size: clamp(2.5rem, 8vw, 5rem); lineHeight: 1.05; letter-spacing: -0.03em;
-    color: var(--txt1);
+    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800;
+    font-size: clamp(2.8rem, 9vw, 5.5rem); lineHeight: 1; letter-spacing: -0.04em;
+    background: linear-gradient(to bottom, #FFF 40%, rgba(255,255,255,0.6) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    padding-bottom: 0.2em;
   }
+
   .hp-hero-stats {
     display: flex; gap: 5rem; justify-content: center; 
     border-top: 1px solid var(--bdr); padding: 4rem 1rem;
-    margin-top: 2rem;
+    margin-top: 4rem;
+    position: relative; z-index: 2;
   }
-  .stat-val { font-size: clamp(2rem, 5vw, 3.5rem); fontWeight: 800; color: var(--txt1); letterSpacing: -0.02em; }
-  .stat-lbl { font-size: 0.85rem; color: var(--txt3); fontWeight: 500; marginTop: 0.3rem; }
+  .stat-val { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; color: var(--txt1); letter-spacing: -0.02em; }
+  .stat-lbl { font-size: 0.85rem; color: var(--txt3); font-weight: 500; margin-top: 0.3rem; }
+
+  /* ── HERO GLOW ── */
+  .hp-hero-glow {
+    position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
+    width: 100%; height: 100%;
+    background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.03) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  .hp-orb {
+    position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+    animation: float 20s infinite alternate ease-in-out;
+    pointer-events: none;
+  }
+  @keyframes float {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(20px, -40px) scale(1.1); }
+  }
+
 
   @media (max-width: 768px) {
     .hp-hero-stats { flex-direction: row; gap: 0.5rem; justify-content: space-between; padding: 2.5rem 0; width: 100%; }
@@ -100,15 +122,7 @@ const GLOBAL_CSS = `
       box-shadow: 0 0 10px rgba(245, 166, 35, 0.5);
     }
     
-    /* TOUCH RIPPLE */
-    .hp-touch-glow {
-      position: fixed; pointer-events: none; z-index: 10002;
-      width: 50px; height: 50px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 80%);
-      transform: translate(-50%, -50%) scale(1); opacity: 0;
-      transition: opacity 0.2s, transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    .hp-touch-glow.active { transform: translate(-50%, -50%) scale(1.6); }
+    .hp-touch-glow { display: none !important; }
   }
   @media (max-width: 480px) {
     .spotlight-card { min-width: 280px; height: 400px; }
@@ -206,7 +220,7 @@ const GLOBAL_CSS = `
     border: 1px solid rgba(255,255,255,0.04);
     border-radius: 20px;
     overflow: hidden;
-    cursor: none;
+    cursor: pointer;
     position: relative;
     transition: transform 0.4s var(--easing), border-color 0.3s;
     min-height: 420px;
@@ -261,6 +275,16 @@ const GLOBAL_CSS = `
     padding: 4px 10px; border-radius: 100px;
     text-transform: uppercase;
   }
+
+  /* ── METADATA TAGS ── */
+  .hp-meta-badge {
+    padding: 3px 8px; border-radius: 4px; font-size: 9px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .priority-high { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+  .priority-med  { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+  .priority-low  { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
 
   .hp-likes-pill {
     position: absolute; top: 1.25rem; right: 1.25rem; z-index: 3;
@@ -411,16 +435,17 @@ const GLOBAL_CSS = `
 
   /* ── MASONRY GRID ── */
   .hp-masonry {
-    column-count: 3;
-    column-gap: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.8rem;
     padding: 0;
   }
+  @media (max-width: 1200px) { .hp-masonry { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 768px)  { .hp-masonry { grid-template-columns: 1fr; gap: 1.5rem; } }
+
   .hp-masonry-item {
-    break-inside: avoid;
-    margin-bottom: 1.5rem;
+    width: 100%;
   }
-  @media (max-width: 1100px) { .hp-masonry { column-count: 2; } }
-  @media (max-width: 680px)  { .hp-masonry { column-count: 1; } }
 
   /* ── SLIDER ── */
   .hp-slider-wrap {
@@ -470,12 +495,17 @@ const GLOBAL_CSS = `
     max-width: 960px; width: 100%;
     background: var(--bg2);
     border: 1px solid var(--bdr-h);
-    border-radius: 20px;
-    position: relative; max-height: 90vh; overflow: hidden;
+    border-radius: 24px;
+    position: relative; max-height: 92vh; overflow: hidden;
     display: grid; grid-template-columns: 1fr 1.15fr;
-    animation: fadeUp 0.45s var(--easing) both;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.6);
+    animation: fadeUp 0.5s var(--easing) both;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.8);
   }
+  @media (max-width: 850px) {
+    .hp-modal-box { grid-template-columns: 1fr; overflow-y: auto; }
+    .hp-modal-img-panel { height: 350px !important; }
+  }
+
 
   /* ── SECTION TITLE ── */
   .hp-section-title {
@@ -626,53 +656,10 @@ const GLOBAL_CSS = `
   input:focus { outline: none; }
   textarea:focus { outline: none; }
 
-  /* ── CUSTOM CURSOR ── */
-  * { cursor: none !important; }
+  /* ── CUSTOM CURSOR REMOVED ── */
+  a, button, .hp-card, .hp-col-card, .spotlight-card, .hp-btn-primary, .hp-btn-ghost, .hp-filter-tab { cursor: pointer !important; }
+  input, textarea { cursor: text !important; }
 
-  .hp-cursor-dot {
-    position: fixed;
-    top: 0; left: 0;
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: #FFF;
-    pointer-events: none;
-    z-index: 99999;
-    transform: translate(-50%, -50%);
-    transition: width 0.2s var(--easing), height 0.2s var(--easing),
-                background 0.2s var(--easing), opacity 0.3s;
-    will-change: transform;
-    mix-blend-mode: difference;
-  }
-  .hp-cursor-dot.hovering {
-    width: 24px; height: 24px;
-    background: rgba(255,255,255,1);
-    mix-blend-mode: difference;
-  }
-  .hp-cursor-dot.clicking {
-    width: 4px; height: 4px;
-  }
-  .hp-cursor-ring, .hp-cursor-trail, .hp-cursor-ping { display: none !important; }
-
-  @media (max-width: 1024px) {
-    .hp-cursor-dot, .hp-cursor-trail { display: none !important; }
-    * { cursor: auto !important; }
-  }
-
-  .hp-cursor-trail {
-    position: fixed;
-    top: 0; left: 0;
-    width: 24px; height: 24px;
-    border-radius: 50%;
-    background: radial-gradient(circle,
-      rgba(45,212,191,0.07) 0%,
-      transparent 70%
-    );
-    pointer-events: none;
-    z-index: 99997;
-    transform: translate(-50%, -50%);
-    will-change: transform;
-    transition: opacity 0.4s;
-  }
 
   /* ── SPOTLIGHT CINEMA ── */
   .spotlight-section {
@@ -956,52 +943,75 @@ function Marquee() {
 function Hero({ totalCount }) {
   return (
     <section style={{
-      paddingTop: "12vh", paddingBottom: "2rem", position: "relative",
+      paddingTop: "180px", paddingBottom: "6rem", position: "relative",
       display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
-      overflow: "hidden"
+      overflow: "hidden", background: "var(--bg1)"
     }}>
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "900px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
+      {/* Dynamic Background Elements */}
+      <div className="hp-hero-glow" />
+      <div className="hp-orb" style={{ width: '400px', height: '400px', background: 'rgba(255,255,255,0.02)', top: '-100px', left: '10%' }} />
+      <div className="hp-orb" style={{ width: '300px', height: '300px', background: 'rgba(255,255,255,0.015)', bottom: '50px', right: '15%', animationDelay: '-5s' }} />
+
+      <div style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
         {/* EyeBrow */}
-        <div style={{ animation: "fadeUp 0.5s ease both", animationDelay: "0s", marginBottom: "1rem" }}>
-          <span className="hp-hero-badge" style={{ fontSize: "0.75rem", letterSpacing: "0.25em", textTransform: "uppercase", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", padding: "0.4rem 1rem", borderRadius: '100px' }}>
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0s", marginBottom: "2rem" }}>
+          <span className="hp-hero-badge" style={{ 
+            fontSize: "0.7rem", letterSpacing: "0.4em", textTransform: "uppercase", 
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", 
+            padding: "0.6rem 1.5rem", borderRadius: '100px', color: 'rgba(255,255,255,0.5)',
+            fontWeight: 700
+          }}>
             Community Prompt Studio & Gallery
           </span>
         </div>
 
         {/* Headline */}
-        <div style={{ animation: "fadeUp 0.55s ease both", animationDelay: "0.08s", marginBottom: "1.2rem" }}>
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.1s", marginBottom: "1.5rem" }}>
           <h1 className="hp-hero-title">
             Share the prompts<br />behind the art.
           </h1>
         </div>
 
         {/* Sub */}
-        <div style={{ animation: "fadeUp 0.55s ease both", animationDelay: "0.16s", marginBottom: "0.5rem" }}>
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.2s", marginBottom: "3rem" }}>
           <p style={{
-            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 500, fontSize: "1.2rem",
-            color: "var(--txt2)", lineHeight: 1.6, maxWidth: "800px", margin: "0 auto"
+            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 500, fontSize: "clamp(1rem, 2vw, 1.25rem)",
+            color: "var(--txt2)", lineHeight: 1.6, maxWidth: "700px", margin: "0 auto", opacity: 0.8
           }}>
             Discover trending AI images and videos that inspire your next creation. Join the community pushing the boundaries of generative art.
           </p>
         </div>
 
+        {/* Actions */}
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.3s", display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
+          <button className="hp-btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Get Started ✦</button>
+          <button className="hp-btn-ghost" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Browse Gallery</button>
+        </div>
+
         {/* Stats */}
-        <div className="hp-hero-stats" style={{ animation: "fadeUp 0.6s ease both", animationDelay: "0.32s" }}>
+        <div className="hp-hero-stats" style={{ animation: "fadeIn 1.2s ease both", animationDelay: "0.5s" }}>
           {[
             [totalCount || "10K+", "Prompts Shared"],
-            ["240", "Active Creators"],
+            ["240+ ", "Active Creators"],
             ["50K", "Community Saves"]
           ].map(([val, lbl]) => (
             <div key={lbl} style={{ textAlign: "center" }}>
               <div className="stat-val">{val}</div>
-              <div className="stat-lbl">{lbl}</div>
+              <div className="stat-lbl" style={{ opacity: 0.5 }}>{lbl}</div>
             </div>
           ))}
         </div>
       </div>
+
+      {/* Modern Divider */}
+      <div style={{ 
+        position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
+        width: '1px', height: '100px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)'
+      }} />
     </section >
   );
 }
+
 
 /* ─────────────────────────────────────────────
    SEARCH BAR
@@ -1039,7 +1049,13 @@ function PromptCard({ data, index, onOpen, onCopy, onAuthRequired, className = "
         </div>
 
         {/* Floating Badges */}
-        <div className="hp-badge-f">{badgeLabel}</div>
+        <div style={{ position: 'absolute', top: '1.25rem', left: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 10 }}>
+          <div className="hp-badge-f" style={{ position: 'static' }}>{badgeLabel}</div>
+          <div className={`hp-meta-badge ${data.priority === 'High' ? 'priority-high' : data.priority === 'Medium' ? 'priority-med' : 'priority-low'}`}>
+            {data.priority || 'Normal'}
+          </div>
+        </div>
+
 
         <button
           className={`hp-likes-pill ${liked ? 'liked' : ''}`}
@@ -1189,8 +1205,13 @@ function UploadView({ onBack }) {
     prompt: "",
     tags: [],
     category: "FASHION",
-    modelName: "Select Model"
+    modelName: "Select Model",
+    issueType: "Task",
+    assignee: "",
+    priority: "Medium",
+    dueDate: ""
   });
+
 
   const onFileSelect = (e) => {
     const f = e.target.files[0];
@@ -1241,8 +1262,13 @@ function UploadView({ onBack }) {
         imageUrl: imageUrl,
         category: formData.category,
         modelName: formData.modelName,
-        tags: formData.tags
+        tags: formData.tags,
+        issueType: formData.issueType,
+        assignee: formData.assignee,
+        priority: formData.priority,
+        dueDate: formData.dueDate
       };
+
 
       await axios.post(`${config.API_BASE_URL}/category`, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -1385,6 +1411,52 @@ function UploadView({ onBack }) {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
             <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Issue Type</label>
+              <select
+                style={{ width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)", padding: "1rem", borderRadius: 12, color: "#FFF", outline: "none" }}
+                value={formData.issueType}
+                onChange={e => setFormData({ ...formData, issueType: e.target.value })}
+              >
+                {["Task", "Bug", "Feature", "Project"].map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Priority</label>
+              <select
+                style={{ width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)", padding: "1rem", borderRadius: 12, color: "#FFF", outline: "none" }}
+                value={formData.priority}
+                onChange={e => setFormData({ ...formData, priority: e.target.value })}
+              >
+                {["Low", "Medium", "High"].map(f => <option key={f} value={f}>{f}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Assignee</label>
+              <input
+                className="hp-upload-input"
+                value={formData.assignee}
+                onChange={e => setFormData({ ...formData, assignee: e.target.value })}
+                placeholder="Name"
+                style={{ width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)", padding: "1rem", borderRadius: 12, color: "#FFF" }}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Due Date</label>
+              <input
+                type="date"
+                className="hp-upload-input"
+                value={formData.dueDate}
+                onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                style={{ width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)", padding: "1rem", borderRadius: 12, color: "#FFF" }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+            <div>
               <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Category</label>
               <select
                 style={{ width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)", padding: "1rem", borderRadius: 12, color: "#FFF", outline: "none" }}
@@ -1402,6 +1474,7 @@ function UploadView({ onBack }) {
               />
             </div>
           </div>
+
 
           <button
             type="submit"
@@ -1703,7 +1776,7 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
         >×</button>
 
         {/* Image Panel */}
-        <div style={{ position: "relative", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+        <div className="hp-modal-img-panel" style={{ position: "relative", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
           <img src={data.imageUrl} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt={data.title} />
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.9) 100%)" }} />
           <div style={{ position: "absolute", bottom: "1.5rem", left: "1.5rem" }}>
@@ -1758,14 +1831,49 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
             </p>
           </div>
 
+          {/* Metadata Grid */}
+          <div style={{
+            display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem",
+            background: "rgba(255,255,255,0.03)", borderRadius: 16, padding: "1.5rem",
+            marginBottom: "2rem", border: "1px solid rgba(255,255,255,0.05)"
+          }}>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Issue Type</label>
+              <span style={{ fontSize: "0.85rem", color: "var(--txt1)", fontWeight: 600 }}>{data.issueType || "Project"}</span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Priority</label>
+              <span className={`hp-meta-badge ${data.priority === 'High' ? 'priority-high' : data.priority === 'Medium' ? 'priority-med' : 'priority-low'}`}>
+                {data.priority || "Medium"}
+              </span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Assignee</label>
+              <span style={{ fontSize: "0.85rem", color: "var(--txt1)", fontWeight: 600 }}>{data.assignee || "Unassigned"}</span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Due Date</label>
+              <span style={{ fontSize: "0.85rem", color: "var(--txt1)", fontWeight: 600 }}>{data.dueDate ? new Date(data.dueDate).toLocaleDateString() : "No Deadline"}</span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Created</label>
+              <span style={{ fontSize: "0.8rem", color: "var(--txt2)" }}>{new Date(data.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Updated</label>
+              <span style={{ fontSize: "0.8rem", color: "var(--txt2)" }}>{new Date(data.updatedAt || data.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+
           {/* Tags */}
           {tags.length > 0 && (
             <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "2rem" }}>
               {tags.map(t => (
-                <span key={t} className="hp-chip" style={{ fontSize: "0.72rem" }}>{t}</span>
+                <span key={t} className="hp-chip" style={{ fontSize: "0.72rem", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: 6 }}>{t}</span>
               ))}
             </div>
           )}
+
 
           {/* Actions */}
           <div style={{ marginTop: "auto", display: "flex", gap: "0.75rem" }}>
@@ -1907,33 +2015,6 @@ export default function PromptGallery() {
   const [view, setView] = useState("GALLERY"); // "GALLERY", "COLLECTIONS", "WISHLIST", "STUDIO", "TRENDING", "UPLOAD"
   const [toast, showToast] = useToast();
 
-  const [scrollPct, setScrollPct] = useState(0);
-  const [touchPos, setTouchPos] = useState({ x: 0, y: 0, show: false });
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const h = document.documentElement, b = document.body;
-      const st = h.scrollTop || b.scrollTop;
-      const sh = h.scrollHeight || b.scrollHeight;
-      setScrollPct((st / (sh - h.clientHeight)) * 100);
-    };
-    const handleTouch = (e) => {
-      const t = e.touches ? e.touches[0] : e;
-      setTouchPos({ x: t.clientX, y: t.clientY, show: true });
-    };
-    const handleTouchEnd = () => setTouchPos(p => ({ ...p, show: false }));
-
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("touchmove", handleTouch, { passive: true });
-    window.addEventListener("touchstart", handleTouch, { passive: true });
-    window.addEventListener("touchend", handleTouchEnd);
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("touchmove", handleTouch);
-      window.removeEventListener("touchstart", handleTouch);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, []);
 
   /* Inject global CSS once */
   useEffect(() => {
@@ -2000,9 +2081,6 @@ export default function PromptGallery() {
   return (
     <div style={{ background: "var(--bg1)", color: "var(--txt1)", minHeight: "100vh", position: "relative", zIndex: 1 }}>
       {/* Mobile Unique Elements */}
-      <div className="hp-mobile-progress" style={{ width: `${scrollPct}%` }} />
-      <div className={`hp-touch-glow ${touchPos.show ? 'active' : ''}`} style={{ left: touchPos.x, top: touchPos.y, opacity: touchPos.show ? 1 : 0 }} />
-
       <Navbar currentView={view} onView={handleViewChange} query={query} setQuery={setQuery} onAuthModal={setAuthModal} />
 
       {/* ─── GALLERY VIEW ─── */}

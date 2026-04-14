@@ -6,21 +6,19 @@ import { useNavigate } from 'react-router-dom';
 import config from '../url/config';
 
 const ProfilePage = () => {
-    const { user, token, userLogout, userLogin, admin, adminToken, adminLogout, adminLogin } = useAuth();
+    const { user, token, userLogout, userLogin } = useAuth();
     const navigate = useNavigate();
 
-    // Identify active profile (prefer admin if both exist for this specific page)
-    const isActiveAdmin = !!adminToken;
-    const activeProfile = isActiveAdmin ? admin : user;
-    const activeToken = isActiveAdmin ? adminToken : token;
-    const logoutFn = isActiveAdmin ? adminLogout : userLogout;
-    const loginFn = isActiveAdmin ? adminLogin : userLogin;
-    const apiPath = isActiveAdmin ? '/auth/admin' : '/auth/user';
-    const homePath = isActiveAdmin ? '/admin' : '/';
+    const activeProfile = user;
+    const activeToken = token;
+    const logoutFn = userLogout;
+    const loginFn = userLogin;
+    const apiPath = '/auth/user';
+    const homePath = '/';
 
     const [isEditing, setIsEditing] = useState(false);
-    const [editUsername, setEditUsername] = useState(activeProfile?.username || '');
-    const [editEmail, setEditEmail] = useState(activeProfile?.email || '');
+    const [editUsername, setEditUsername] = useState(user?.username || '');
+    const [editEmail, setEditEmail] = useState(user?.email || '');
     const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
 
@@ -54,7 +52,7 @@ const ProfilePage = () => {
     };
 
     const handleDeleteAccount = async () => {
-        if (!window.confirm(`Are you sure you want to delete your ${isActiveAdmin ? 'ADMIN' : ''} account? This action cannot be undone.`)) return;
+        if (!window.confirm(`Are you sure you want to delete your account? This action cannot be undone.`)) return;
         
         const typed = window.prompt(`Please type your email (${activeProfile.email}) to confirm:`);
         if (!typed || typed.trim() !== activeProfile.email) {
@@ -67,24 +65,14 @@ const ProfilePage = () => {
                 headers: { Authorization: `Bearer ${activeToken}` }
             });
             logoutFn();
-            navigate(isActiveAdmin ? '/admin/login' : '/login');
+            navigate('/login');
         } catch (err) {
             setStatusMsg({ type: 'error', text: err.response?.data?.error || 'Failed to delete account' });
         }
     };
 
     const sidebarCss = `
-        .sidebar { width: 260px; background: #09090b; border-right: 1px solid rgba(255,255,255,.05); display: flex; flex-direction: column; height: 100vh; position: sticky; top: 0; }
-        .sidebar-brand { height: 72px; padding: 0 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid rgba(255,255,255,.05); color: #fff; font-weight: 800; font-size: 1.05rem; }
-        .sidebar-nav { flex: 1; padding: 24px 12px; display: flex; flex-direction: column; gap: 4px; }
-        .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; text-decoration: none; color: #71717a; font-size: 0.875rem; font-weight: 600; transition: all .2s; cursor: pointer; border: none; background: none; width: 100%; text-align: left; }
-        .nav-item:hover { background: rgba(255,255,255,.05); color: #fff; }
-        .nav-item.active { background: rgba(139,92,246,.1); color: #8b5cf6; }
-        .logout-btn { margin: 12px; padding: 12px 16px; border-radius: 12px; background: rgba(239,68,68,.08); color: #ef4444; border: none; cursor: pointer; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 14px; transition: .2s; }
-        .logout-btn:hover { background: rgba(239,68,68,.15); }
-        
         @media (max-width: 1024px) {
-            .sidebar { display: none; }
             .profile-main { padding: 5rem 1.5rem 2rem !important; }
             .profile-card { padding-bottom: 2rem !important; }
             .profile-name { font-size: 1.8rem !important; }
@@ -98,36 +86,13 @@ const ProfilePage = () => {
             minHeight: '100vh', background: '#000', color: '#FFF', 
             fontFamily: "'Cabinet Grotesk', sans-serif", display: 'flex' 
         }}>
-            {isActiveAdmin && <style>{sidebarCss}</style>}
+            {/* Profile specific styles */}
+            <style>{sidebarCss}</style>
             
-            {isActiveAdmin && (
-                <aside className="sidebar">
-                    <div className="sidebar-brand">
-                        <Home size={20} />
-                        <span>Prompt Core</span>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#8b5cf6', marginLeft: 'auto', boxShadow: '0 0 10px #8b5cf6' }} />
-                    </div>
 
-                    <nav className="sidebar-nav">
-                        <button onClick={() => navigate('/admin')} className="nav-item">
-                            <Compass size={18} /><span>Collections</span>
-                        </button>
-                        <button onClick={() => navigate('/users')} className="nav-item">
-                            <User size={18} /><span>Users</span>
-                        </button>
-                        <button className="nav-item active">
-                            <ShieldCheck size={18} /><span>Profile</span>
-                        </button>
-                    </nav>
-
-                    <button onClick={() => { adminLogout(); navigate('/admin/login'); }} className="logout-btn">
-                        <LogOut size={16} /> Logout
-                    </button>
-                </aside>
-            )}
 
             {/* Main Content */}
-            <div className="profile-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: isActiveAdmin ? '2rem 2rem' : '4rem 2rem' }}>
+            <div className="profile-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8rem 2rem' }}>
                 
                 {/* Header Actions */}
                 <div style={{ width: '100%', maxWidth: '800px', display: 'flex', justifyContent: 'space-between', marginBottom: '3rem' }}>
@@ -135,16 +100,14 @@ const ProfilePage = () => {
                         onClick={() => navigate(homePath)}
                         style={{ background: 'none', border: 'none', color: '#71717A', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
                     >
-                        <ArrowLeft size={18} /> {isActiveAdmin ? 'Back to Dashboard' : 'Back to Gallery'}
+                        <ArrowLeft size={18} /> Back to Gallery
                     </button>
-                    {!isActiveAdmin && (
-                        <button 
-                            onClick={() => { logoutFn(); navigate(isActiveAdmin ? '/admin/login' : '/login'); }}
-                            style={{ background: '#18181B', border: '1px solid #27272A', color: '#EF4444', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                        >
-                            <LogOut size={16} /> Logout
-                        </button>
-                    )}
+                    <button 
+                        onClick={() => { logoutFn(); navigate('/login'); }}
+                        style={{ background: '#18181B', border: '1px solid #27272A', color: '#EF4444', padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                        <LogOut size={16} /> Logout
+                    </button>
                 </div>
 
                 {/* Profile Card */}
@@ -154,11 +117,8 @@ const ProfilePage = () => {
                 }}>
                     
                     {/* Cover Area */}
-                    <div style={{ height: '180px', background: isActiveAdmin ? 'linear-gradient(90deg, #581c87 0%, #2e1065 100%)' : 'linear-gradient(90deg, #18181B 0%, #09090B 100%)', position: 'relative' }}>
+                    <div style={{ height: '180px', background: 'linear-gradient(90deg, #18181B 0%, #09090B 100%)', position: 'relative' }}>
                         <div style={{ position: 'absolute', inset: 0, opacity: 0.2, backgroundImage: 'radial-gradient(#FFF 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
-                        {isActiveAdmin && (
-                            <div style={{ position: 'absolute', top: '1rem', right: '1.5rem', background: 'rgba(255,255,255,0.1)', color: '#FFF', padding: '0.25rem 0.75rem', borderRadius: '100px', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em' }}>ADMIN ACCOUNT</div>
-                        )}
                     </div>
 
                     {/* Profile Info Overlay */}
@@ -233,11 +193,11 @@ const ProfilePage = () => {
                                 <span style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#71717A', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Account Role</span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                                     <div style={{ width: '40px', height: '40px', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        {isActiveAdmin ? <Settings size={20} color="#8b5cf6" /> : <Heart size={20} color="#EF4444" />}
+                                        <Heart size={20} color="#EF4444" />
                                     </div>
                                     <div>
-                                        <div style={{ fontSize: '1rem', fontWeight: 800 }}>{isActiveAdmin ? 'System Admin' : 'Standard Member'}</div>
-                                        <div style={{ fontSize: '0.8rem', color: '#71717A' }}>{isActiveAdmin ? 'Full Control' : 'Unlocked Features'}</div>
+                                        <div style={{ fontSize: '1rem', fontWeight: 800 }}>Standard Member</div>
+                                        <div style={{ fontSize: '0.8rem', color: '#71717A' }}>Unlocked Features</div>
                                     </div>
                                 </div>
                             </div>
@@ -276,7 +236,7 @@ const ProfilePage = () => {
                                 onClick={handleDeleteAccount}
                                 style={{ background: 'none', border: 'none', color: '#EF4444', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
                             >
-                                <Trash2 size={14} style={{ marginRight: '0.25rem' }} /> {isActiveAdmin ? 'Terminate Administrator Access' : 'Permanent Account Deletion'}
+                                <Trash2 size={14} style={{ marginRight: '0.25rem' }} /> Permanent Account Deletion
                             </button>
                         </div>
 
