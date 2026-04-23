@@ -174,11 +174,23 @@ const AdminPanel = () => {
       .sidebar { display: none; }
       .mobile-dock { display: flex; }
       .main { margin-left: 0; padding-bottom: 100px; }
-      .top-bar { padding: 0 20px; height: 70px; }
-      .search-box { width: 100%; max-width: 240px; }
-      .content { padding: 40px 20px; }
+      .top-bar { padding: 0 20px; height: 70px; gap: 15px; }
+      .search-box { flex: 1; max-width: none; }
+      .content { padding: 30px 20px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+      .section-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+      
+      .btn-create span { display: none; }
+      .btn-create { padding: 12px; border-radius: 50%; aspect-ratio: 1; justify-content: center; }
+      
+      .admin-username { display: none; }
+      .admin-profile-divider { padding-right: 12px !important; border-right: none !important; }
+    }
+
+    @media (max-width: 600px) {
       .grid { grid-template-columns: 1fr; }
-      .section-head { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .top-bar { padding: 0 15px; gap: 10px; }
+      .modal-content { padding: 24px; border-radius: 24px; max-height: 85vh; }
     }
   `;
 
@@ -216,8 +228,8 @@ const AdminPanel = () => {
         <header className="top-bar">
           <div className="search-box"><Search size={16} color="rgba(255,255,255,0.4)" /><input style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.8rem', outline: 'none' }} placeholder="Search Node..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} /></div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '20px' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.6)' }}>{admin?.username}</span>
+            <div className="admin-profile-divider" style={{ display: 'flex', alignItems: 'center', gap: '12px', borderRight: '1px solid rgba(255,255,255,0.1)', paddingRight: '20px' }}>
+              <span className="admin-username" style={{ fontSize: '0.75rem', fontWeight: 900, color: 'rgba(255,255,255,0.6)' }}>{admin?.username}</span>
               <NavLink to="/admin/profile" style={{ padding: '3px', border: '1.5px solid rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', overflow: 'hidden' }}>
                 {admin?.profilePic ? (
                   <img src={admin.profilePic} alt="admin" style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }} />
