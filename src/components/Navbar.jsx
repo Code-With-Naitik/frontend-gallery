@@ -151,9 +151,9 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
 
           {/* Authentication / Profile */}
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            {/* Show User Profile or Sign In based ONLY on user token */}
             {token ? (
               <div style={{ display: "flex", alignItems: "center", gap: "0.85rem" }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#FFF' }}>{user?.username}</span>
                 <a href="/profile" style={{ display: "flex", transition: "transform 0.2s" }} onMouseOver={e => e.currentTarget.style.transform = "scale(1.1)"} onMouseOut={e => e.currentTarget.style.transform = "scale(1)"}>
                   <img
                     src={`https://api.dicebear.com/7.x/notionists/svg?seed=${user?.username || 'Guest'}`}

@@ -62,15 +62,18 @@ const AdminPanel = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedFile && !formData.imageUrl) {
+      showToast('error', 'Critical Data Missing: Please attach a visual or provide an Image URL prior to committing.');
+      return;
+    }
+    
     setIsUploading(true);
     let finalImageUrl = formData.imageUrl;
     try {
       if (selectedFile) {
         const fd = new FormData();
         fd.append('image', selectedFile);
-        const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
+        const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd);
         finalImageUrl = res.data.imageUrl;
       }
       const payload = {
@@ -164,11 +167,25 @@ const AdminPanel = () => {
     .card-img { width: 100%; height: 240px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.08); }
     .card-body { padding: 24px; }
     
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: #0a0a0c; border: 1px solid rgba(255,255,255,0.1); border-radius: 40px; width: 100%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 40px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: linear-gradient(145deg, #111116 0%, #0a0a0c 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 40px; box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); animation: modalFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    
+    @keyframes modalFade { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .spin { animation: spin 1s linear infinite; }
+    
+    .ad-input { width: 100%; padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.3s; font-family: inherit; }
+    .ad-input:focus { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.25); box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
+    .ad-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); display: block; margin-bottom: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+    
+    .ad-file-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 160px; border-radius: 16px; background: rgba(255,255,255,0.015); border: 1.5px dashed rgba(255,255,255,0.15); cursor: pointer; overflow: hidden; position: relative; transition: all 0.3s ease; }
+    .ad-file-drop:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.3); }
+    .ad-file-preview { width: 100%; height: 100%; object-fit: cover; }
+    .ad-file-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px); }
+    .ad-file-drop:hover .ad-file-hover { opacity: 1; }
 
-    .btn-create { background: #fff; color: #000; border-radius: 100px; padding: 12px 24px; font-weight: 900; border: none; cursor: Pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-    .btn-create:hover { transform: scale(1.05); }
+    .btn-create { background: #fff; color: #000; border-radius: 100px; padding: 12px 24px; font-weight: 900; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
 
     @media (max-width: 1024px) {
       .sidebar { display: none; }
@@ -253,7 +270,7 @@ const AdminPanel = () => {
             <div className="grid">
               {filtered.map(cat => (
                 <div className="card" key={cat.id}>
-                  <img src={cat.imageUrl} className="card-img" />
+                  <img src={cat.imageUrl} className="card-img" onError={(e) => e.target.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'} />
                   <div className="card-body">
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '10px' }}>{cat.title}</h3>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -279,12 +296,43 @@ const AdminPanel = () => {
               <button onClick={closeModal} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>NODE TITLE</label><input style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required /></div>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>CORE PROMPT</label><textarea style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', minHeight: '120px' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required /></div>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>IMAGE URL</label><input style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://Your Image.com/..." /></div>
-              <div style={{ marginBottom: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 700 }}>— OR —</div>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>ATTACH VISUAL</label><input type="file" onChange={e => handleFileChange(e.target.files[0])} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }} /></div>
-              <button type="submit" className="btn-create" style={{ width: '100%', marginTop: '20px' }}>{isUploading ? 'Executing...' : 'Commit to Core'}</button>
+              <div style={{ marginBottom: '24px' }}><label className="ad-label">NODE TITLE</label><input className="ad-input" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required placeholder="e.g. Neon Cyberpunk City" /></div>
+              <div style={{ marginBottom: '24px' }}><label className="ad-label">CORE PROMPT</label><textarea className="ad-input" style={{ minHeight: '100px', resize: 'vertical' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required placeholder="Describe the generated image in detail..." /></div>
+              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." /></div>
+              
+              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+                <span style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>OR ATTACH VISUAL</span>
+                <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+              </div>
+              
+              <div style={{ marginBottom: '32px' }}>
+                <label className="ad-file-drop">
+                  <input type="file" style={{ display: 'none' }} onChange={e => handleFileChange(e.target.files[0])} accept="image/*" />
+                  {filePreview ? (
+                    <>
+                      <img src={filePreview} className="ad-file-preview" alt="Preview" />
+                      <div className="ad-file-hover">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
+                          <Edit2 size={16} /> Replace Image
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <UploadCloud size={20} color="rgba(255,255,255,0.6)" />
+                      </div>
+                      <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Click to browse or drop file</span>
+                    </div>
+                  )}
+                </label>
+              </div>
+
+              <button type="submit" className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center' }}>
+                {isUploading ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
+                {isUploading ? 'Executing...' : 'Commit to Core'}
+              </button>
             </form>
           </div>
         </div>

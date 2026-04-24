@@ -1092,7 +1092,7 @@ function PromptCard({ data, index, onOpen, onCopy, onAuthRequired, className = "
 
         {/* Image Zone */}
         <div className="hp-card-img-zone">
-          <img src={data.imageUrl} className="hp-card-img" alt={data.title} loading="lazy" />
+          <img src={data.imageUrl} className="hp-card-img" alt={data.title} loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
           <div className="hp-card-scrim" />
         </div>
 
@@ -1671,7 +1671,7 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
           >
             <div className="spotlight-shine" />
             <div className="spotlight-img-wrap">
-              <img src={cat.imageUrl} className="spotlight-img" alt={cat.title} />
+              <img src={cat.imageUrl} className="spotlight-img" alt={cat.title} onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
             </div>
             <div className="spotlight-overlay" />
 
