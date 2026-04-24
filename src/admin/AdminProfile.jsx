@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, NavLink, Link } from 'react-router-dom';
-import { 
-    LayoutGrid, User, LogOut, ShieldCheck, Mail, Calendar, 
+import {
+    LayoutGrid, User, LogOut, ShieldCheck, Mail, Calendar,
     Shield, ArrowLeft, Edit3, Camera, Menu, Rocket, Search,
     ChevronRight, Zap, ShieldAlert, Cpu, Users, Home, Settings,
     UploadCloud, Loader2
@@ -33,9 +33,9 @@ const AdminProfile = () => {
         setLoading(true);
         setStatusMsg({ type: '', text: '' });
         try {
-            const payload = { 
-                username: editUsername.trim(), 
-                email: editEmail.trim().toLowerCase() 
+            const payload = {
+                username: editUsername.trim(),
+                email: editEmail.trim().toLowerCase()
             };
             if (newProfilePic) {
                 payload.profilePic = newProfilePic;
@@ -48,7 +48,7 @@ const AdminProfile = () => {
                 payload,
                 { headers: { Authorization: `Bearer ${adminToken}` } }
             );
-            
+
             adminLogin(adminToken, res.data);
             setIsEditing(false);
             setStatusMsg({ type: 'success', text: 'Identity protocol synchronized.' });
@@ -186,7 +186,7 @@ const AdminProfile = () => {
             <aside className="sidebar">
                 <Link to="/" className="sidebar-head">
                     <div className="sys-logo"><Cpu size={18} /></div>
-                    <span className="sys-name">BANANA <span style={{ opacity: 0.4 }}>CORE</span></span>
+                    <span className="sys-name">propy <span style={{ opacity: 0.4 }}>CORE</span></span>
                 </Link>
                 <nav className="sidebar-nav">
                     <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-btn active' : 'nav-btn'}><LayoutGrid size={18} /><span>Manager</span></NavLink>
@@ -238,7 +238,7 @@ const AdminProfile = () => {
 
                         <section className="info-pane">
                             <h3 className="pane-title"><ShieldCheck size={28} /><span>Registry Metadata</span></h3>
-                            
+
                             {isEditing ? (
                                 <div style={{ animation: 'slideUp 0.4s var(--easing)' }}>
                                     <div><label className="f-label">Identity ID</label><input className="f-control" value={editUsername} onChange={e => setEditUsername(e.target.value)} /></div>

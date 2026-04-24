@@ -20,7 +20,7 @@ const AdminPanel = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [formData, setFormData] = useState({ 
+  const [formData, setFormData] = useState({
     title: '', imageUrl: '', prompt: '', tags: '',
     issueType: 'Task', priority: 'Medium', assignee: '', dueDate: ''
   });
@@ -209,13 +209,13 @@ const AdminPanel = () => {
       <aside className="sidebar">
         <Link to="/" className="sidebar-head" style={{ textDecoration: 'none', color: '#fff' }}>
           <div className="sys-logo"><Cpu size={18} /></div>
-          <span style={{ fontWeight: 900 }}>BANANA CORE</span>
+          <span style={{ fontWeight: 900 }}>propy CORE</span>
         </Link>
         <nav className="sidebar-nav">
           <NavLink to="/admin" className="nav-btn active"><LayoutGrid size={18} /><span>Manager</span></NavLink>
           <NavLink to="/users" className="nav-btn"><Users size={18} /><span>Directory</span></NavLink>
           <NavLink to="/admin/profile" className="nav-btn"><User size={18} /><span>Profile</span></NavLink>
-          
+
           <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
             <button onClick={handleLogout} className="nav-btn" style={{ width: '100%', background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444' }}>
               <LogOut size={18} /><span>Logout</span>
@@ -279,8 +279,10 @@ const AdminPanel = () => {
               <button onClick={closeModal} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>NODE TITLE</label><input style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required /></div>
-              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>CORE PROMPT</label><textarea style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', minHeight: '120px' }} value={formData.prompt} onChange={e => setFormData({...formData, prompt: e.target.value})} required /></div>
+              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>NODE TITLE</label><input style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required /></div>
+              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>CORE PROMPT</label><textarea style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', minHeight: '120px' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required /></div>
+              <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>IMAGE URL</label><input style={{ width: '100%', padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://Your Image.com/..." /></div>
+              <div style={{ marginBottom: '20px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '12px', fontWeight: 700 }}>— OR —</div>
               <div style={{ marginBottom: '20px' }}><label style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '8px' }}>ATTACH VISUAL</label><input type="file" onChange={e => handleFileChange(e.target.files[0])} style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }} /></div>
               <button type="submit" className="btn-create" style={{ width: '100%', marginTop: '20px' }}>{isUploading ? 'Executing...' : 'Commit to Core'}</button>
             </form>

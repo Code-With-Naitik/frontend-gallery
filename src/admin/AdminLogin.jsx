@@ -30,13 +30,13 @@ const AdminLogin = () => {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: '#000000', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      padding: '2rem', 
+    <div style={{
+      minHeight: '100vh',
+      background: '#000000',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '2rem',
       overflow: 'hidden',
       position: 'relative'
     }}>
@@ -157,23 +157,23 @@ const AdminLogin = () => {
 
       <div className="admin-login-card">
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-          <div style={{ 
-            width: '72px', height: '72px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)', 
+          <div style={{
+            width: '72px', height: '72px', background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.08)',
             borderRadius: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem',
             boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)'
           }}>
             <ShieldCheck size={36} color="#fff" strokeWidth={1.5} />
           </div>
-          <h1 style={{ 
-            fontSize: '2.5rem', fontWeight: 900, color: '#fff', 
+          <h1 style={{
+            fontSize: '2.5rem', fontWeight: 900, color: '#fff',
             letterSpacing: '-0.05em', marginBottom: '0.75rem', lineHeight: 1
           }}>ADMIN <span style={{ color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.4)' }}>PORTAL</span></h1>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '1rem', fontWeight: 500, letterSpacing: '0.02em' }}>Secure Access System</p>
         </div>
 
         {error && (
-          <div style={{ 
-            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1.1rem', 
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '1.1rem',
             borderRadius: '18px', color: '#fca5a5', fontSize: '0.9rem', textAlign: 'center', marginBottom: '2rem',
             fontWeight: 500, animation: 'shake 0.5s ease'
           }}>
@@ -188,7 +188,7 @@ const AdminLogin = () => {
               <Mail size={20} style={{ position: 'absolute', left: '1.25rem', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.2)' }} />
               <input
                 type="email"
-                placeholder="admin@banana.art"
+                placeholder="admin@propy.art"
                 className="admin-input"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -215,8 +215,8 @@ const AdminLogin = () => {
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={loading}
             className="submit-btn"
           >
@@ -235,7 +235,7 @@ const AdminLogin = () => {
           </p>
         </div>
       </div>
-      
+
       <style>{`
         .spin-animation { animation: spin 1.2s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }

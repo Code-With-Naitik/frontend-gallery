@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { 
-    Users, Plus, Search, Trash2, Edit2, ArrowRight, Activity, 
+import {
+    Users, Plus, Search, Trash2, Edit2, ArrowRight, Activity,
     ShieldAlert, CheckCircle, RefreshCcw, LayoutGrid, User, LogOut, Cpu,
     Home, Settings, ChevronRight
 } from 'lucide-react';
@@ -103,7 +103,7 @@ const UserManagement = () => {
         navigate('/admin/login');
     };
 
-    const filteredUsers = users.filter(u => 
+    const filteredUsers = users.filter(u =>
         u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -206,7 +206,7 @@ const UserManagement = () => {
             <aside className="sidebar">
                 <Link to="/" className="sidebar-head">
                     <div className="sys-logo"><Cpu size={18} /></div>
-                    <span className="sys-name">BANANA <span style={{ opacity: 0.4 }}>CORE</span></span>
+                    <span className="sys-name">propy <span style={{ opacity: 0.4 }}>CORE</span></span>
                 </Link>
                 <nav className="sidebar-nav">
                     <NavLink to="/admin" className={({ isActive }) => isActive ? 'nav-btn active' : 'nav-btn'}><LayoutGrid size={18} /><span>Manager</span></NavLink>
@@ -225,12 +225,12 @@ const UserManagement = () => {
                 <header className="top-bar">
                     <div className="search-box">
                         <Search size={16} color="var(--text-muted)" />
-                        <input 
-                            type="text" 
-                            placeholder="Find node handle..." 
+                        <input
+                            type="text"
+                            placeholder="Find node handle..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.8rem', outline: 'none' }} 
+                            style={{ background: 'none', border: 'none', color: '#fff', fontSize: '0.8rem', outline: 'none' }}
                         />
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -257,10 +257,10 @@ const UserManagement = () => {
                         <div className="form-card">
                             <h3 style={{ fontSize: '1.25rem', fontWeight: 950, marginBottom: '32px' }}>Initialize Node</h3>
                             <form onSubmit={handleCreate}>
-                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Identity Alias</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="text" placeholder="username" value={formData.username} onChange={e => setFormData({...formData, username: e.target.value})} required /></div>
-                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Endpoint Mail</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="email" placeholder="mail@system.io" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required /></div>
-                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Secret Cipher</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required /></div>
-                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Access Level</label><select style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none', appearance: 'none' }} value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})}><option value="user" style={{ background: '#0a0a0c' }}>Standard User</option><option value="admin" style={{ background: '#0a0a0c' }}>Administrator</option></select></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Identity Alias</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="text" placeholder="username" value={formData.username} onChange={e => setFormData({ ...formData, username: e.target.value })} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Endpoint Mail</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="email" placeholder="mail@system.io" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Secret Cipher</label><input style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none' }} type="password" placeholder="••••••••" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} required /></div>
+                                <div className="f-field"><label style={{ fontSize: '10px', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Access Level</label><select style={{ width: '100%', padding: '14px 18px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', borderRadius: '14px', color: '#fff', fontSize: '0.95rem', marginBottom: '18px', outline: 'none', appearance: 'none' }} value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })}><option value="user" style={{ background: '#0a0a0c' }}>Standard User</option><option value="admin" style={{ background: '#0a0a0c' }}>Administrator</option></select></div>
                                 <button type="submit" className="btn-init"><span>Deploy Node</span><ArrowRight size={18} /></button>
                             </form>
                             {(success || error) && <div style={{ marginTop: '20px', color: success ? '#4ade80' : '#f87171', fontSize: '0.8rem', fontWeight: 700 }}>{success || error}</div>}

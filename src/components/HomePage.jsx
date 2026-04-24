@@ -99,11 +99,40 @@ const GLOBAL_CSS = `
     .hp-hero-stats { flex-direction: row; gap: 0.5rem; justify-content: space-between; padding: 2.5rem 0; width: 100%; }
     .stat-val { font-size: 1.6rem !important; }
     .stat-lbl { font-size: 0.65rem !important; margin-top: 0.1rem; }
-    .spotlight-card { min-width: 320px; height: 460px; }
-    .spotlight-title { font-size: 1.75rem; }
-    .spotlight-info { padding: 25px; }
+    .spotlight-card { min-width: 300px; height: 440px; }
+    .spotlight-title { font-size: 1.6rem; }
+    .spotlight-info { padding: 20px; }
     .hp-upload-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-    .hp-upload-zone { height: 350px !important; }
+    .hp-upload-zone { height: 280px !important; }
+    
+    /* Mobile hero padding */
+    .hp-hero-inner { padding: 0 1.25rem !important; }
+    .hp-hero-actions { flex-direction: column !important; align-items: stretch !important; }
+    .hp-hero-actions button { width: 100% !important; justify-content: center !important; }
+
+    /* Featured strip */
+    .hp-featured-strip-grid { grid-template-columns: 1fr !important; }
+    .hp-featured-img { 
+      border-radius: 19px 19px 0 0 !important; 
+      min-height: 240px !important;
+      height: 240px !important;
+    }
+    /* Switch gradient direction when stacked: hide top, fade to black at bottom */
+    .hp-featured-grad { background: linear-gradient(to bottom, transparent 40%, rgba(5,5,5,0.95) 100%) !important; }
+    .hp-featured-info { 
+      padding: 2rem 1.25rem !important; 
+      text-align: center !important;
+      align-items: center !important;
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    .hp-featured-info .hp-label { justify-content: center !important; }
+    .hp-featured-actions { 
+      flex-wrap: wrap !important; 
+      justify-content: center !important;
+      width: 100% !important;
+    }
+    .hp-featured-actions button { flex: 1 1 130px !important; justify-content: center !important; }
     
     .hp-filter-scroller {
       overflow-x: auto; -webkit-overflow-scrolling: touch;
@@ -114,19 +143,30 @@ const GLOBAL_CSS = `
     }
     .hp-filter-scroller::-webkit-scrollbar { display: none; }
 
-    /* MOBILE SCROLL PROGRESS */
-    .hp-mobile-progress {
-      position: fixed; top: 0; left: 0; height: 3px; z-index: 10001;
-      background: linear-gradient(90deg, #F5A623, #2DD4BF, #F5A623);
-      width: 0%; transition: width 0.1s linear;
-      box-shadow: 0 0 10px rgba(245, 166, 35, 0.5);
+    /* Cards on mobile: smaller min-height */
+    .hp-card { min-height: 320px !important; }
+
+    /* Gallery & section padding */
+    .hp-gallery-wrap { padding: 1.25rem 1rem 5rem !important; }
+    .hp-section-pad { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+
+    /* Spotlight section header — center on mobile */
+    .hp-spotlight-header {
+      flex-direction: column !important;
+      align-items: center !important;
+      text-align: center !important;
+      padding: 0 1.25rem 3rem !important;
     }
+    .hp-spotlight-header > div { width: 100%; text-align: center; }
+    .hp-spotlight-header > div > div { justify-content: center !important; }
+    .hp-spotlight-header button { width: 100%; justify-content: center; }
     
     .hp-touch-glow { display: none !important; }
   }
   @media (max-width: 480px) {
-    .spotlight-card { min-width: 280px; height: 400px; }
+    .spotlight-card { min-width: 260px; height: 380px; }
     .hp-hero-badge { letter-spacing: 0.1em !important; font-size: 0.65rem !important; padding: 0.3rem 0.8rem !important; }
+    .hp-modal-img-panel { height: 220px !important; }
   }
 
   /* ── FadeUp keyframe ── */
@@ -486,10 +526,10 @@ const GLOBAL_CSS = `
 
   /* ── MODAL ── */
   .hp-modal-backdrop {
-    position: fixed; inset: 0; z-index: 1000;
+    position: fixed; inset: 0; z-index: 10000;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(20px);
-    display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+    display: flex; align-items: center; justify-content: center; padding: 1rem;
   }
   .hp-modal-box {
     max-width: 960px; width: 100%;
@@ -501,9 +541,17 @@ const GLOBAL_CSS = `
     animation: fadeUp 0.5s var(--easing) both;
     box-shadow: 0 40px 120px rgba(0,0,0,0.8);
   }
-  @media (max-width: 850px) {
-    .hp-modal-box { grid-template-columns: 1fr; overflow-y: auto; }
-    .hp-modal-img-panel { height: 350px !important; }
+  @media (max-width: 768px) {
+    .hp-modal-backdrop { padding: 0; align-items: flex-end; }
+    .hp-modal-box {
+      grid-template-columns: 1fr; overflow-y: auto;
+      border-radius: 28px 28px 0 0; max-height: calc(100% - 90px); width: 100%; height: 100%;
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+    }
+    .hp-modal-img-panel { height: 260px !important; }
+    .hp-modal-info { padding: 1.5rem !important; }
+    .hp-modal-actions { flex-direction: column !important; }
+    .hp-modal-actions button { width: 100% !important; justify-content: center !important; }
   }
 
 
@@ -952,12 +1000,12 @@ function Hero({ totalCount }) {
       <div className="hp-orb" style={{ width: '400px', height: '400px', background: 'rgba(255,255,255,0.02)', top: '-100px', left: '10%' }} />
       <div className="hp-orb" style={{ width: '300px', height: '300px', background: 'rgba(255,255,255,0.015)', bottom: '50px', right: '15%', animationDelay: '-5s' }} />
 
-      <div style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
+      <div className="hp-hero-inner" style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
         {/* EyeBrow */}
         <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0s", marginBottom: "2rem" }}>
-          <span className="hp-hero-badge" style={{ 
-            fontSize: "0.7rem", letterSpacing: "0.4em", textTransform: "uppercase", 
-            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", 
+          <span className="hp-hero-badge" style={{
+            fontSize: "0.7rem", letterSpacing: "0.4em", textTransform: "uppercase",
+            background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
             padding: "0.6rem 1.5rem", borderRadius: '100px', color: 'rgba(255,255,255,0.5)',
             fontWeight: 700
           }}>
@@ -983,7 +1031,7 @@ function Hero({ totalCount }) {
         </div>
 
         {/* Actions */}
-        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.3s", display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
+        <div className="hp-hero-actions" style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.3s", display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
           <button className="hp-btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Get Started ✦</button>
           <button className="hp-btn-ghost" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Browse Gallery</button>
         </div>
@@ -1004,7 +1052,7 @@ function Hero({ totalCount }) {
       </div>
 
       {/* Modern Divider */}
-      <div style={{ 
+      <div style={{
         position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '1px', height: '100px', background: 'linear-gradient(to bottom, rgba(255,255,255,0.1), transparent)'
       }} />
@@ -1118,7 +1166,7 @@ function PromptCard({ data, index, onOpen, onCopy, onAuthRequired, className = "
 function GalleryGrid({ prompts, onOpen, onCopy, onAuthRequired }) {
   const ref = useFadeIn();
   return (
-    <div ref={ref} className="hp-fade" style={{ padding: "2rem 2.5rem 6rem", maxWidth: 1320, margin: "0 auto" }}>
+    <div ref={ref} className="hp-fade hp-gallery-wrap" style={{ padding: "2rem 2.5rem 6rem", maxWidth: 1320, margin: "0 auto" }}>
       <div className="hp-masonry">
         {prompts.map((p, i) => (
           <PromptCard key={p._id || p.id} data={p} index={i} onOpen={onOpen} onCopy={onCopy} onAuthRequired={onAuthRequired} />
@@ -1579,7 +1627,7 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
     <div ref={ref} className="hp-fade spotlight-section">
       <div className="spotlight-glow" />
 
-      <div style={{ padding: "0 2.5rem 4rem", maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 5, flexWrap: 'wrap', gap: '2rem' }}>
+      <div className="hp-spotlight-header" style={{ padding: "0 2.5rem 4rem", maxWidth: 1400, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "flex-end", position: "relative", zIndex: 5, flexWrap: 'wrap', gap: '2rem' }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
             <span style={{ width: "40px", height: "1px", background: "rgba(255,255,255,0.3)" }} />
@@ -1785,7 +1833,7 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
         </div>
 
         {/* Info Panel */}
-        <div style={{ padding: "3rem 2.5rem", overflowY: "auto", display: "flex", flexDirection: "column", background: "var(--bg2)" }}>
+        <div className="hp-modal-info" style={{ padding: "3rem 2.5rem", overflowY: "auto", display: "flex", flexDirection: "column", background: "var(--bg2)" }}>
           <span className="hp-label" style={{ marginBottom: "1.5rem" }}>Prompt Detail</span>
 
           <h2 style={{
@@ -1876,7 +1924,7 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
 
 
           {/* Actions */}
-          <div style={{ marginTop: "auto", display: "flex", gap: "0.75rem" }}>
+          <div className="hp-modal-actions" style={{ marginTop: "auto", display: "flex", gap: "0.75rem" }}>
             <button
               className="hp-btn-primary"
               style={{ flex: 2, justifyContent: "center", padding: "0.9rem" }}
@@ -1922,7 +1970,7 @@ function AuthModal({ onClose }) {
         <div style={{ fontSize: "3rem", marginBottom: "1.5rem" }}>🔒</div>
         <h2 style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800, fontSize: "1.75rem", color: "#FFF", marginBottom: "1rem" }}>Login Required</h2>
         <p style={{ color: "var(--txt2)", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "2.5rem" }}>
-          First, sign in to your account to use this feature. Joining Banana allows you to curate your personal wishlist and share your creations with the community!
+          First, sign in to your account to use this feature. Joining propy allows you to curate your personal wishlist and share your creations with the community!
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <button
@@ -1930,7 +1978,7 @@ function AuthModal({ onClose }) {
             style={{ width: "100%", justifyContent: "center", padding: "1.1rem" }}
             onClick={() => { onClose(); navigate("/login"); }}
           >
-            Sign In to Banana
+            Sign In to propy
           </button>
           <button
             className="hp-btn-ghost"
@@ -1949,32 +1997,32 @@ function FeaturedStrip({ data, onOpen, onCopy }) {
   const ref = useFadeIn();
   if (!data) return null;
   return (
-    <div ref={ref} className="hp-fade" style={{ padding: "0 2.5rem 8rem", maxWidth: 1320, margin: "0 auto" }}>
-      <div className="hp-cta-border" style={{
+    <div ref={ref} className="hp-fade" style={{ padding: "0 1.5rem 6rem", maxWidth: 1320, margin: "0 auto" }}>
+      <div className="hp-featured-strip-grid hp-cta-border" style={{
         display: "grid", gridTemplateColumns: "1fr 1.1fr",
         minHeight: 480, overflow: "hidden"
       }}>
         {/* Image */}
-        <div style={{ position: "relative", overflow: "hidden", borderRadius: "19px 0 0 19px" }}>
+        <div className="hp-featured-img" style={{ position: "relative", overflow: "hidden", borderRadius: "19px 0 0 19px", minHeight: 260 }}>
           <div style={{
             position: "absolute", inset: 0,
             backgroundImage: `url(${data.imageUrl})`,
             backgroundSize: "cover", backgroundPosition: "center",
             transition: "transform 0.5s"
           }} />
-          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 50%, rgba(5,5,5,0.98) 100%)" }} />
+          <div className="hp-featured-grad" style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, transparent 50%, rgba(5,5,5,0.98) 100%)" }} />
           <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}>
             <Badge type="hot">🔥 Featured Pick</Badge>
           </div>
         </div>
 
         {/* Info */}
-        <div style={{ padding: "3.5rem 3rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="hp-featured-info" style={{ padding: "3.5rem 3rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <span className="hp-label" style={{ marginBottom: "1.25rem" }}>Editor's Spotlight</span>
 
           <h2 style={{
             fontFamily: "'Cabinet Grotesk', sans-serif",
-            fontWeight: 800, fontSize: "clamp(2rem, 4vw, 3rem)",
+            fontWeight: 800, fontSize: "clamp(1.5rem, 4vw, 3rem)",
             color: "var(--txt1)", lineHeight: 1.1, marginBottom: "1.25rem", letterSpacing: "-0.02em"
           }}>
             {data.title}
@@ -1990,7 +2038,7 @@ function FeaturedStrip({ data, onOpen, onCopy }) {
             </p>
           </div>
 
-          <div style={{ display: "flex", gap: "0.85rem" }}>
+          <div className="hp-featured-actions" style={{ display: "flex", gap: "0.85rem" }}>
             <button className="hp-btn-primary" onClick={() => onCopy(data.prompt)}>Copy Prompt</button>
             <button className="hp-btn-ghost" onClick={() => onOpen(data)}>View Details →</button>
           </div>
@@ -2138,20 +2186,20 @@ export default function PromptGallery() {
           )}
         </>
       ) : view === "WISHLIST" ? (
-        <div style={{ paddingTop: 68 }}>
+        <div style={{ paddingTop: 90 }}>
           <WishlistView onOpen={setModal} onCopy={handleCopy} />
         </div>
       ) : view === "TRENDING" ? (
-        <div style={{ paddingTop: 68 }}>
+        <div style={{ paddingTop: 90 }}>
           <TrendingView prompts={prompts} onOpen={setModal} onCopy={handleCopy} onAuthRequired={() => setAuthModal(true)} />
         </div>
       ) : view === "UPLOAD" ? (
-        <div style={{ paddingTop: 68 }}>
+        <div style={{ paddingTop: 90 }}>
           <UploadView onBack={() => setView("GALLERY")} />
         </div>
       ) : (
         /* ─── COLLECTIONS VIEW ─── */
-        <div style={{ paddingTop: 68 }}>
+        <div style={{ paddingTop: 90 }}>
           {/* Collections Hero */}
           <div style={{ padding: "5rem 2.5rem 2rem", maxWidth: 1320, margin: "0 auto" }}>
             <div style={{ animation: "fadeUp 0.5s ease both" }}>
@@ -2190,7 +2238,7 @@ export default function PromptGallery() {
         <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
           <div className="hp-logo-icon" style={{ fontSize: "0.8rem" }}>F</div>
           <span style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800, fontSize: "1.1rem", color: "var(--txt1)", letterSpacing: "-0.02em" }}>
-            Banana Prompts
+            propy Prompts
           </span>
         </div>
         <p style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontSize: "0.78rem", color: "var(--txt3)", letterSpacing: "0.06em" }}>

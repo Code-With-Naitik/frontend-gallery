@@ -29,7 +29,7 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
       <style>{`
         .nav-container {
           position: fixed; top: 1.5rem; left: 50%; transform: translateX(-50%);
-          z-index: 1000; width: 92%; max-width: 1320px;
+          z-index: 20000; width: 92%; max-width: 1320px;
           transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
         }
         .nav-inner {
@@ -55,7 +55,7 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
 
         .mobile-overlay {
           position: fixed; inset: 0; background: rgba(0,0,0,0.95);
-          backdrop-filter: blur(20px); z-index: 2000;
+          backdrop-filter: blur(20px); z-index: 21000;
           display: flex; flex-direction: column; padding: 2.5rem;
           transform: translateY(-100%); transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -79,7 +79,7 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
                 fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.25rem",
                 color: "#FFF", textTransform: "lowercase"
               }}>
-                banana
+                propy
               </span>
             </a>
           </div>
@@ -187,7 +187,7 @@ const Navbar = ({ currentView, onView, query, setQuery, onAuthModal }) => {
       {/* Mobile Menu Overlay */}
       <div className={`mobile-overlay ${mobileMenuOpen ? 'open' : ''}`}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
-          <span style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.75rem", color: "#FFF" }}>banana</span>
+          <span style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 900, fontSize: "1.75rem", color: "#FFF" }}>propy</span>
           <button style={{ background: 'none', border: 'none', color: '#FFF' }} onClick={() => setMobileMenuOpen(false)}>
             <X size={32} />
           </button>
