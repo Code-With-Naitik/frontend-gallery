@@ -22,11 +22,13 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     title: '', imageUrl: '', prompt: '', tags: '',
-    issueType: 'Task', priority: 'Medium', assignee: '', dueDate: ''
+    category: 'FASHION', modelName: 'Midjourney V6'
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isImageSyncing, setIsImageSyncing] = useState(false);
+  const [imageSynced, setImageSynced] = useState(false);
 
   const { admin, adminToken, adminLogout } = useAuth();
   const navigate = useNavigate();
@@ -52,32 +54,103 @@ const AdminPanel = () => {
     finally { setLoading(false); }
   };
 
-  const handleFileChange = (file) => {
+  const compressImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const timeoutId = setTimeout(() => reject(new Error('Compression timed out')), 10000);
+
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onerror = () => { clearTimeout(timeoutId); reject(new Error('Failed to load image')); };
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 1200;
+
+            if (width > height && width > maxDim) {
+              height = Math.round(height * maxDim / width);
+              width = maxDim;
+            } else if (height > maxDim) {
+              width = Math.round(width * maxDim / height);
+              height = maxDim;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+              clearTimeout(timeoutId);
+              if (!blob) { reject(new Error('Canvas blob is null')); return; }
+              resolve(new File([blob], file.name || 'image.jpg', {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              }));
+            }, 'image/jpeg', 0.75);
+          } catch (e) {
+            clearTimeout(timeoutId);
+            reject(e);
+          }
+        };
+      };
+      reader.onerror = () => { clearTimeout(timeoutId); reject(new Error('Failed to read file')); };
+    });
+  };
+
+  const handleFileChange = async (file) => {
     if (!file) return;
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setFilePreview(reader.result);
-    reader.readAsDataURL(file);
+
+    // 1. Show instant local preview
+    const localUrl = URL.createObjectURL(file);
+    setFilePreview(localUrl);
+    setIsImageSyncing(true);
+
+    try {
+      // 2. Try to compress, fall back to original if compression fails
+      let fileToUpload = file;
+      try {
+        fileToUpload = await compressImage(file);
+      } catch (compressErr) {
+        console.warn('Compression skipped, using original:', compressErr.message);
+      }
+
+      // 3. Upload to server with a timeout
+      const fd = new FormData();
+      fd.append('image', fileToUpload);
+      const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd, {
+        timeout: 30000, // 30 second max
+      });
+
+      // 4. Auto-fill the IMAGE URL field
+      setFormData(prev => ({ ...prev, imageUrl: res.data.imageUrl }));
+      setImageSynced(true);
+      showToast('success', 'Visual asset synchronized');
+    } catch (err) {
+      showToast('error', 'Upload failed. Please try again.');
+      setFilePreview(null);
+      setImageSynced(false);
+      console.error('Upload error:', err);
+    } finally {
+      setIsImageSyncing(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedFile && !formData.imageUrl) {
+    if (!formData.imageUrl) {
       showToast('error', 'Critical Data Missing: Please attach a visual or provide an Image URL prior to committing.');
       return;
     }
-    
+
     setIsUploading(true);
-    let finalImageUrl = formData.imageUrl;
     try {
-      if (selectedFile) {
-        const fd = new FormData();
-        fd.append('image', selectedFile);
-        const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd);
-        finalImageUrl = res.data.imageUrl;
-      }
       const payload = {
-        ...formData, imageUrl: finalImageUrl,
+        ...formData,
         tags: formData.tags.split(',').map(t => {
           const s = t.trim(); return s.startsWith('#') ? s : `#${s}`;
         }).filter(t => t !== '#')
@@ -98,10 +171,8 @@ const AdminPanel = () => {
     setFormData({
       title: cat.title, imageUrl: cat.imageUrl, prompt: cat.prompt,
       tags: Array.isArray(cat.tags) ? cat.tags.join(', ') : cat.tags || '',
-      issueType: cat.issueType || 'Task',
-      priority: cat.priority || 'Medium',
-      assignee: cat.assignee || '',
-      dueDate: cat.dueDate ? new Date(cat.dueDate).toISOString().split('T')[0] : ''
+      category: cat.category || 'FASHION',
+      modelName: cat.modelName || 'Midjourney V6'
     });
     setFilePreview(null); setSelectedFile(null); setIsModalOpen(true);
   };
@@ -117,8 +188,8 @@ const AdminPanel = () => {
 
   const closeModal = () => {
     setIsModalOpen(false); setEditingCategory(null);
-    setFormData({ title: '', imageUrl: '', prompt: '', tags: '', issueType: 'Task', priority: 'Medium', assignee: '', dueDate: '' });
-    setSelectedFile(null); setFilePreview(null);
+    setFormData({ title: '', imageUrl: '', prompt: '', tags: '', category: 'FASHION', modelName: 'Midjourney V6' });
+    setSelectedFile(null); setFilePreview(null); setImageSynced(false);
   };
 
   const filtered = categories.filter(c =>
@@ -257,7 +328,7 @@ const AdminPanel = () => {
                 )}
               </NavLink>
             </div>
-            <button className="btn-create" onClick={() => setIsModalOpen(true)}><Plus size={18} /><span>Add Node</span></button>
+            <button className="btn-create" onClick={() => setIsModalOpen(true)}><Plus size={18} /><span>Add Prompts</span></button>
           </div>
         </header>
 
@@ -269,8 +340,8 @@ const AdminPanel = () => {
           {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: '100px' }}><Loader2 className="spin" /></div> : (
             <div className="grid">
               {filtered.map(cat => (
-                <div className="card" key={cat.id}>
-                  <img src={cat.imageUrl} className="card-img" onError={(e) => e.target.src='https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'} />
+                <div className="card" key={cat._id || cat.id}>
+                  <img src={cat.imageUrl} className="card-img" onError={(e) => e.target.src = 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400'} />
                   <div className="card-body">
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '10px' }}>{cat.title}</h3>
                     <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -278,7 +349,7 @@ const AdminPanel = () => {
                     </div>
                     <div style={{ display: 'flex', gap: '10px' }}>
                       <button style={{ flex: 1, padding: '10px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer' }} onClick={() => handleEdit(cat)}><Edit2 size={16} /></button>
-                      <button style={{ padding: '10px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', cursor: 'pointer' }} onClick={() => handleDelete(cat.id)}><Trash2 size={16} /></button>
+                      <button style={{ padding: '10px', borderRadius: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', cursor: 'pointer' }} onClick={() => handleDelete(cat._id || cat.id)}><Trash2 size={16} /></button>
                     </div>
                   </div>
                 </div>
@@ -298,23 +369,59 @@ const AdminPanel = () => {
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '24px' }}><label className="ad-label">NODE TITLE</label><input className="ad-input" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required placeholder="e.g. Neon Cyberpunk City" /></div>
               <div style={{ marginBottom: '24px' }}><label className="ad-label">CORE PROMPT</label><textarea className="ad-input" style={{ minHeight: '100px', resize: 'vertical' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required placeholder="Describe the generated image in detail..." /></div>
-              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." /></div>
-              
+              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." readOnly={imageSynced} style={{ opacity: imageSynced ? 0.7 : 1, cursor: imageSynced ? 'default' : 'text' }} /></div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
+                <div>
+                  <label className="ad-label">CATEGORY</label>
+                  <select className="ad-input" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
+                    <option value="FASHION">Fashion</option>
+                    <option value="CYBERPUNK">Cyberpunk</option>
+                    <option value="ANIME">Anime</option>
+                    <option value="NATURE">Nature</option>
+                    <option value="ARCHITECTURE">Architecture</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="ad-label">MODEL NAME</label>
+                  <select className="ad-input" value={formData.modelName} onChange={e => setFormData({ ...formData, modelName: e.target.value })}>
+                    <option value="Midjourney V6">Midjourney V6</option>
+                    <option value="DALL-E 3">DALL-E 3</option>
+                    <option value="Stable Diffusion">Stable Diffusion</option>
+                  </select>
+                </div>
+              </div>
+
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
                 <span style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>OR ATTACH VISUAL</span>
                 <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
               </div>
-              
+
               <div style={{ marginBottom: '32px' }}>
                 <label className="ad-file-drop">
                   <input type="file" style={{ display: 'none' }} onChange={e => handleFileChange(e.target.files[0])} accept="image/*" />
                   {filePreview ? (
                     <>
                       <img src={filePreview} className="ad-file-preview" alt="Preview" />
-                      <div className="ad-file-hover">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
-                          <Edit2 size={16} /> Replace Image
+                      <div className="ad-file-hover" style={{ opacity: isImageSyncing ? 1 : undefined }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
+                          {isImageSyncing ? (
+                            <>
+                              <Loader2 className="spin" size={24} />
+                              <span>Syncing to Core...</span>
+                            </>
+                          ) : imageSynced ? (
+                            <>
+                              <CheckCircle2 size={24} color="#22c55e" />
+                              <span style={{ color: '#22c55e' }}>Synced ✓</span>
+                            </>
+                          ) : (
+                            <>
+                              <Edit2 size={16} />
+                              <span>Replace Image</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </>
@@ -329,9 +436,9 @@ const AdminPanel = () => {
                 </label>
               </div>
 
-              <button type="submit" className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center' }}>
-                {isUploading ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
-                {isUploading ? 'Executing...' : 'Commit to Core'}
+              <button type="submit" disabled={isImageSyncing} className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center', opacity: isImageSyncing ? 0.6 : 1, cursor: isImageSyncing ? 'not-allowed' : 'pointer' }}>
+                {isUploading || isImageSyncing ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
+                {isUploading ? 'Executing...' : isImageSyncing ? 'Syncing Image...' : 'Commit to Core'}
               </button>
             </form>
           </div>

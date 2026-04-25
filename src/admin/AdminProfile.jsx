@@ -206,13 +206,12 @@ const AdminProfile = () => {
                     <Link to="/" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontWeight: 900, fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '0.05em' }}>
                         <ArrowLeft size={16} /><span>EXIT SYSTEM</span>
                     </Link>
-                    <div style={{ fontWeight: 950, fontSize: '0.85rem', color: '#fff', letterSpacing: '0.15em', background: 'rgba(255,255,255,0.05)', padding: '6px 14px', borderRadius: '100px', border: '1px solid var(--border)' }}>ROOT_PROTO_INIT</div>
                 </header>
 
                 <div className="content">
                     <div className="p-hero">
-                        <h1 className="p-title">Identity Registry</h1>
-                        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', fontWeight: 500 }}>Global node configuration and visual identity.</p>
+                        <h1 className="p-title">Admin Identity</h1>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '1.25rem', fontWeight: 500 }}>Admin Identity configuration and visual identity.</p>
                     </div>
 
                     <div className="profile-stack">
