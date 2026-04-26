@@ -21,8 +21,7 @@ const AdminPanel = () => {
   const [editingCategory, setEditingCategory] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
-    title: '', imageUrl: '', prompt: '', tags: '',
-    issueType: 'Task', priority: 'Medium', assignee: '', dueDate: ''
+    title: '', imageUrl: '', prompt: '', tags: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
@@ -63,7 +62,7 @@ const AdminPanel = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedFile && !formData.imageUrl) {
-      showToast('error', 'Critical Data Missing: Please attach a visual or provide an Image URL prior to committing.');
+      showToast('error', 'Critical Data Missing: Please attach a visual or provide an Image URL.');
       return;
     }
 
@@ -77,14 +76,25 @@ const AdminPanel = () => {
         finalImageUrl = res.data.imageUrl;
       }
       const payload = {
-        ...formData, imageUrl: finalImageUrl,
-        tags: formData.tags.split(',').map(t => {
-          const s = t.trim(); return s.startsWith('#') ? s : `#${s}`;
-        }).filter(t => t !== '#')
+        ...formData,
+        imageUrl: finalImageUrl,
+        tags: typeof formData.tags === 'string'
+          ? formData.tags.split(',').map(t => {
+            const s = t.trim();
+            return s.startsWith('#') ? s : (s ? `#${s}` : '');
+          }).filter(t => t !== '')
+          : formData.tags
       };
+
       const cfg = { headers: { Authorization: `Bearer ${adminToken}` } };
-      if (editingCategory) await axios.put(`${API_URL}/${editingCategory._id || editingCategory.id}`, payload, cfg);
-      else await axios.post(API_URL, payload, cfg);
+      const id = editingCategory?._id || editingCategory?.id;
+
+      if (editingCategory) {
+        await axios.put(`${API_URL}/${id}`, payload, cfg);
+      } else {
+        await axios.post(API_URL, payload, cfg);
+      }
+
       closeModal();
       fetchCategories();
       showToast('success', editingCategory ? 'Node updated' : 'Node initialized');
@@ -96,20 +106,22 @@ const AdminPanel = () => {
   const handleEdit = (cat) => {
     setEditingCategory(cat);
     setFormData({
-      title: cat.title, imageUrl: cat.imageUrl, prompt: cat.prompt,
+      title: cat.title || '',
+      imageUrl: cat.imageUrl || '',
+      prompt: cat.prompt || '',
       tags: Array.isArray(cat.tags) ? cat.tags.join(', ') : cat.tags || '',
-      issueType: cat.issueType || 'Task',
-      priority: cat.priority || 'Medium',
-      assignee: cat.assignee || '',
-      dueDate: cat.dueDate ? new Date(cat.dueDate).toISOString().split('T')[0] : ''
+      category: cat.category || 'FASHION',
+      modelName: cat.modelName || 'Midjourney V6'
     });
-    setFilePreview(null); setSelectedFile(null); setIsModalOpen(true);
+    setFilePreview(cat.imageUrl || null);
+    setSelectedFile(null);
+    setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Erase this data node?')) return;
     if (!adminToken) {
-      showToast('error', 'Not authenticated. Please log in as admin.');
+      showToast('error', 'Not authenticated. Please log in.');
       navigate('/admin/login');
       return;
     }
@@ -120,23 +132,24 @@ const AdminPanel = () => {
       fetchCategories();
       showToast('success', 'Node purged successfully.');
     } catch (err) {
-      console.error('Delete error:', err.response?.data || err.message);
       const msg = err.response?.data?.error || err.message || 'Purge failed';
       showToast('error', `Delete failed: ${msg}`);
     }
   };
 
   const closeModal = () => {
-    setIsModalOpen(false); setEditingCategory(null);
-    setFormData({ title: '', imageUrl: '', prompt: '', tags: '', issueType: 'Task', priority: 'Medium', assignee: '', dueDate: '' });
-    setSelectedFile(null); setFilePreview(null);
+    setIsModalOpen(false);
+    setEditingCategory(null);
+    setFormData({ title: '', imageUrl: '', prompt: '', tags: '' });
+    setSelectedFile(null);
+    setFilePreview(null);
   };
 
   const filtered = categories.filter(c =>
     c.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-    const css = `
+  const css = `
     @import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
     
     body { background: #030303; color: #fff; font-family: 'Cabinet Grotesk', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -308,13 +321,28 @@ const AdminPanel = () => {
               <button onClick={closeModal} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}><X size={24} /></button>
             </div>
             <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '24px' }}><label className="ad-label">NODE TITLE</label><input className="ad-input" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required placeholder="e.g. Neon Cyberpunk City" /></div>
-              <div style={{ marginBottom: '24px' }}><label className="ad-label">CORE PROMPT</label><textarea className="ad-input" style={{ minHeight: '100px', resize: 'vertical' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required placeholder="Describe the generated image in detail..." /></div>
-              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." /></div>
+              <div style={{ marginBottom: '20px' }}>
+                <label className="ad-label">NODE TITLE</label>
+                <input className="ad-input" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required placeholder="e.g. Neon Cyberpunk City" />
+              </div>
 
-              <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label className="ad-label">CORE PROMPT</label>
+                <textarea className="ad-input" style={{ minHeight: '80px', resize: 'vertical' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required placeholder="Describe the generated image in detail..." />
+              </div>
+              <div style={{ marginBottom: '20px' }}>
+                <label className="ad-label">TAGS (COMMA SEPARATED)</label>
+                <input className="ad-input" value={formData.tags} onChange={e => setFormData({ ...formData, tags: e.target.value })} placeholder="neon, futuristic, dark" />
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label className="ad-label">IMAGE URL</label>
+                <input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." />
+              </div>
+
+              <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
-                <span style={{ fontSize: '11px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>OR ATTACH VISUAL</span>
+                <span style={{ fontSize: '10px', fontWeight: 800, color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>OR ATTACH VISUAL</span>
                 <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
               </div>
 
@@ -332,10 +360,10 @@ const AdminPanel = () => {
                     </>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <UploadCloud size={20} color="rgba(255,255,255,0.6)" />
+                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <UploadCloud size={18} color="rgba(255,255,255,0.6)" />
                       </div>
-                      <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Click to browse or drop file</span>
+                      <span style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', fontWeight: 600 }}>Click to browse or drop file</span>
                     </div>
                   )}
                 </label>
@@ -343,7 +371,7 @@ const AdminPanel = () => {
 
               <button type="submit" className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center' }}>
                 {isUploading ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
-                {isUploading ? 'Executing...' : 'Commit to Core'}
+                {isUploading ? 'Executing...' : (editingCategory ? 'Update Node' : 'Initialize Node')}
               </button>
             </form>
           </div>
