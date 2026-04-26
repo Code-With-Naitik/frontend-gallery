@@ -6,23 +6,27 @@ import { useNavigate } from 'react-router-dom';
 import config from '../url/config';
 
 const ProfilePage = () => {
-    const { user, token, userLogout, userLogin } = useAuth();
+    const { user, admin, token, adminToken, userLogout, adminLogout, userLogin, adminLogin } = useAuth();
     const navigate = useNavigate();
 
-    const activeProfile = user;
-    const activeToken = token;
-    const logoutFn = userLogout;
-    const loginFn = userLogin;
-    const apiPath = '/auth/user';
+    const activeProfile = user || admin;
+    const activeToken = token || adminToken;
+    const logoutFn = admin ? adminLogout : userLogout;
+    const loginFn = admin ? adminLogin : userLogin;
+    const apiPath = admin ? '/auth/admin' : '/auth/user';
     const homePath = '/';
 
     const [isEditing, setIsEditing] = useState(false);
-    const [editUsername, setEditUsername] = useState(user?.username || '');
-    const [editEmail, setEditEmail] = useState(user?.email || '');
+    const [editUsername, setEditUsername] = useState(activeProfile?.username || '');
+    const [editEmail, setEditEmail] = useState(activeProfile?.email || '');
     const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
     const [loading, setLoading] = useState(false);
 
-    if (!activeProfile) return null;
+    if (!activeProfile) return (
+      <div style={{ minHeight: '100vh', background: '#000', color: '#FFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p>Please login to view your profile.</p>
+      </div>
+    );
 
     const handleUpdateProfile = async () => {
         const trimmedUsername = editUsername.trim();

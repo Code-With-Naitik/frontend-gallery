@@ -6,17 +6,18 @@ import config from '../url/config';
 const WishlistContext = createContext();
 
 export const WishlistProvider = ({ children }) => {
-  const { token } = useAuth();
+  const { token, adminToken } = useAuth();
+  const effectiveToken = token || adminToken;
   const [wishlist, setWishlist] = useState([]);
 
   // Fetch wishlist from server on mount/auth change
   useEffect(() => {
     const fetchWishlist = async () => {
-      if (token) {
+      if (effectiveToken) {
         try {
           const response = await axios.get(`${config.API_BASE_URL}/wishlist`, {
             headers: {
-              'Authorization': `Bearer ${token}`
+              'Authorization': `Bearer ${effectiveToken}`
             }
           });
           if (response.status === 200) {
@@ -42,10 +43,10 @@ export const WishlistProvider = ({ children }) => {
 
     try {
       const response = await axios.post(`${config.API_BASE_URL}/wishlist/toggle`, 
-        { categoryId: item.id || item._id },
+        { categoryId: item._id || item.id },
         {
           headers: {
-            'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${effectiveToken}`
           }
         }
       );
@@ -61,7 +62,7 @@ export const WishlistProvider = ({ children }) => {
     if (!id) return false;
     const searchId = id.toString();
     return (wishlist || []).some((item) => {
-      const itemId = (item.id || item._id || item.cid || item.uid)?.toString();
+      const itemId = (item._id || item.id || item.cid || item.uid)?.toString();
       return itemId === searchId;
     });
   };

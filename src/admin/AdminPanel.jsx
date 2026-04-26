@@ -22,13 +22,11 @@ const AdminPanel = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [formData, setFormData] = useState({
     title: '', imageUrl: '', prompt: '', tags: '',
-    category: 'FASHION', modelName: 'Midjourney V6'
+    issueType: 'Task', priority: 'Medium', assignee: '', dueDate: ''
   });
   const [selectedFile, setSelectedFile] = useState(null);
   const [filePreview, setFilePreview] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [isImageSyncing, setIsImageSyncing] = useState(false);
-  const [imageSynced, setImageSynced] = useState(false);
 
   const { admin, adminToken, adminLogout } = useAuth();
   const navigate = useNavigate();
@@ -54,103 +52,32 @@ const AdminPanel = () => {
     finally { setLoading(false); }
   };
 
-  const compressImage = (file) => {
-    return new Promise((resolve, reject) => {
-      const timeoutId = setTimeout(() => reject(new Error('Compression timed out')), 10000);
-
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = (event) => {
-        const img = new Image();
-        img.src = event.target.result;
-        img.onerror = () => { clearTimeout(timeoutId); reject(new Error('Failed to load image')); };
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            const maxDim = 1200;
-
-            if (width > height && width > maxDim) {
-              height = Math.round(height * maxDim / width);
-              width = maxDim;
-            } else if (height > maxDim) {
-              width = Math.round(width * maxDim / height);
-              height = maxDim;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob((blob) => {
-              clearTimeout(timeoutId);
-              if (!blob) { reject(new Error('Canvas blob is null')); return; }
-              resolve(new File([blob], file.name || 'image.jpg', {
-                type: 'image/jpeg',
-                lastModified: Date.now(),
-              }));
-            }, 'image/jpeg', 0.75);
-          } catch (e) {
-            clearTimeout(timeoutId);
-            reject(e);
-          }
-        };
-      };
-      reader.onerror = () => { clearTimeout(timeoutId); reject(new Error('Failed to read file')); };
-    });
-  };
-
-  const handleFileChange = async (file) => {
+  const handleFileChange = (file) => {
     if (!file) return;
-
-    // 1. Show instant local preview
-    const localUrl = URL.createObjectURL(file);
-    setFilePreview(localUrl);
-    setIsImageSyncing(true);
-
-    try {
-      // 2. Try to compress, fall back to original if compression fails
-      let fileToUpload = file;
-      try {
-        fileToUpload = await compressImage(file);
-      } catch (compressErr) {
-        console.warn('Compression skipped, using original:', compressErr.message);
-      }
-
-      // 3. Upload to server with a timeout
-      const fd = new FormData();
-      fd.append('image', fileToUpload);
-      const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd, {
-        timeout: 30000, // 30 second max
-      });
-
-      // 4. Auto-fill the IMAGE URL field
-      setFormData(prev => ({ ...prev, imageUrl: res.data.imageUrl }));
-      setImageSynced(true);
-      showToast('success', 'Visual asset synchronized');
-    } catch (err) {
-      showToast('error', 'Upload failed. Please try again.');
-      setFilePreview(null);
-      setImageSynced(false);
-      console.error('Upload error:', err);
-    } finally {
-      setIsImageSyncing(false);
-    }
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setFilePreview(reader.result);
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.imageUrl) {
+    if (!selectedFile && !formData.imageUrl) {
       showToast('error', 'Critical Data Missing: Please attach a visual or provide an Image URL prior to committing.');
       return;
     }
 
     setIsUploading(true);
+    let finalImageUrl = formData.imageUrl;
     try {
+      if (selectedFile) {
+        const fd = new FormData();
+        fd.append('image', selectedFile);
+        const res = await axios.post(`${config.API_BASE_URL}/api/upload`, fd);
+        finalImageUrl = res.data.imageUrl;
+      }
       const payload = {
-        ...formData,
+        ...formData, imageUrl: finalImageUrl,
         tags: formData.tags.split(',').map(t => {
           const s = t.trim(); return s.startsWith('#') ? s : `#${s}`;
         }).filter(t => t !== '#')
@@ -171,35 +98,48 @@ const AdminPanel = () => {
     setFormData({
       title: cat.title, imageUrl: cat.imageUrl, prompt: cat.prompt,
       tags: Array.isArray(cat.tags) ? cat.tags.join(', ') : cat.tags || '',
-      category: cat.category || 'FASHION',
-      modelName: cat.modelName || 'Midjourney V6'
+      issueType: cat.issueType || 'Task',
+      priority: cat.priority || 'Medium',
+      assignee: cat.assignee || '',
+      dueDate: cat.dueDate ? new Date(cat.dueDate).toISOString().split('T')[0] : ''
     });
     setFilePreview(null); setSelectedFile(null); setIsModalOpen(true);
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Erase this data node?')) return;
+    if (!adminToken) {
+      showToast('error', 'Not authenticated. Please log in as admin.');
+      navigate('/admin/login');
+      return;
+    }
     try {
-      await axios.delete(`${API_URL}/${id}`, { headers: { Authorization: `Bearer ${adminToken}` } });
+      await axios.delete(`${API_URL}/${id}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
       fetchCategories();
-      showToast('success', 'Node purged');
-    } catch { showToast('error', 'Purge failed'); }
+      showToast('success', 'Node purged successfully.');
+    } catch (err) {
+      console.error('Delete error:', err.response?.data || err.message);
+      const msg = err.response?.data?.error || err.message || 'Purge failed';
+      showToast('error', `Delete failed: ${msg}`);
+    }
   };
 
   const closeModal = () => {
     setIsModalOpen(false); setEditingCategory(null);
-    setFormData({ title: '', imageUrl: '', prompt: '', tags: '', category: 'FASHION', modelName: 'Midjourney V6' });
-    setSelectedFile(null); setFilePreview(null); setImageSynced(false);
+    setFormData({ title: '', imageUrl: '', prompt: '', tags: '', issueType: 'Task', priority: 'Medium', assignee: '', dueDate: '' });
+    setSelectedFile(null); setFilePreview(null);
   };
 
   const filtered = categories.filter(c =>
     c.title?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const css = `
+    const css = `
     @import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&display=swap');
     
-    body { background: #000; color: #fff; font-family: 'Cabinet Grotesk', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    body { background: #030303; color: #fff; font-family: 'Cabinet Grotesk', sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
     .noise { position: fixed; inset: 0; background: url("https://grainy-gradients.vercel.app/noise.svg"); opacity: 0.04; pointer-events: none; z-index: 9999; mix-blend-mode: overlay; }
 
     .admin-layout { display: flex; min-height: 100vh; }
@@ -207,47 +147,48 @@ const AdminPanel = () => {
     /* Unique Mobile Dock */
     .mobile-dock {
         display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-        background: rgba(15, 15, 18, 0.8); backdrop-filter: blur(24px);
-        border: 1px solid rgba(255,255,255,0.1); border-radius: 100px; padding: 8px; z-index: 2000; gap: 8px;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        background: rgba(3, 3, 3, 0.85); backdrop-filter: blur(24px);
+        border: 1px solid rgba(0,240,255,0.2); border-radius: 100px; padding: 8px; z-index: 2000; gap: 8px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 20px rgba(0,240,255,0.1);
     }
     .dock-item { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.4); text-decoration: none; transition: 0.3s; }
-    .dock-item.active { background: #fff; color: #000; }
+    .dock-item.active { background: linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%); color: #000; box-shadow: 0 0 15px rgba(0,240,255,0.3); }
 
-    .sidebar { width: 260px; background: #0a0a0c; border-right: 1px solid rgba(255,255,255,0.08); position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; }
+    .sidebar { width: 260px; background: rgba(3,3,3,0.9); backdrop-filter: blur(24px); border-right: 1px solid rgba(255,255,255,0.08); position: fixed; height: 100vh; left: 0; top: 0; z-index: 1000; display: flex; flex-direction: column; }
     .sidebar-head { padding: 32px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
-    .sys-logo { width: 32px; height: 32px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; }
+    .sys-logo { width: 32px; height: 32px; background: linear-gradient(135deg, #00f0ff, #8a2be2); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #000; }
     
     .sidebar-nav { padding: 24px 12px; flex: 1; display: flex; flex-direction: column; gap: 6px; }
     .nav-btn { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 12px; color: rgba(255,255,255,0.4); text-decoration: none; font-size: 0.85rem; font-weight: 700; transition: 0.3s; }
     .nav-btn:hover { color: #fff; background: rgba(255,255,255,0.03); }
-    .nav-btn.active { color: #fff; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); }
+    .nav-btn.active { color: #00f0ff; background: rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.15); box-shadow: inset 0 0 20px rgba(0,240,255,0.02); }
 
     .main { margin-left: 260px; flex: 1; min-height: 100vh; }
     
-    .top-bar { height: 80px; padding: 0 40px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-    .search-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; padding: 8px 16px; display: flex; align-items: center; gap: 10px; width: 320px; }
+    .top-bar { height: 80px; padding: 0 40px; border-bottom: 1px solid rgba(255,255,255,0.08); background: rgba(3, 3, 3, 0.6); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .search-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 100px; padding: 8px 16px; display: flex; align-items: center; gap: 10px; width: 320px; transition: border-color 0.3s; }
+    .search-box:focus-within { border-color: #00f0ff; box-shadow: 0 0 10px rgba(0,240,255,0.1); }
 
     .content { padding: 60px 40px; }
     .section-head { margin-bottom: 50px; display: flex; align-items: flex-end; justify-content: space-between; }
-    .p-title { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 950; letter-spacing: -0.06em; line-height: 1; }
+    .p-title { font-size: clamp(2.5rem, 8vw, 4rem); font-weight: 950; letter-spacing: -0.06em; line-height: 1; background: linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 32px; }
-    .card { background: #0a0a0c; border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; overflow: hidden; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    .card:hover { transform: translateY(-8px); border-color: rgba(255,255,255,0.2); }
+    .card { background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; overflow: hidden; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s, border-color 0.4s; }
+    .card:hover { transform: translateY(-8px); border-color: #00f0ff; box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 30px rgba(0,240,255,0.15); }
     .card-img { width: 100%; height: 240px; object-fit: cover; border-bottom: 1px solid rgba(255,255,255,0.08); }
     .card-body { padding: 24px; }
     
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .modal-content { background: linear-gradient(145deg, #111116 0%, #0a0a0c 100%); border: 1px solid rgba(255,255,255,0.08); border-radius: 32px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 40px; box-shadow: 0 40px 100px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); animation: modalFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(20px); z-index: 9000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-content { background: rgba(5, 5, 5, 0.95); backdrop-filter: blur(30px); border: 1px solid rgba(255,255,255,0.1); border-radius: 32px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 40px; box-shadow: 0 40px 100px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 80px rgba(0,240,255,0.08); animation: modalFade 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     
-    @keyframes modalFade { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes modalFade { from { opacity: 0; transform: translateY(30px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
     @keyframes spin { 100% { transform: rotate(360deg); } }
     .spin { animation: spin 1s linear infinite; }
     
     .ad-input { width: 100%; padding: 16px; border-radius: 16px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); color: #fff; font-size: 0.95rem; outline: none; transition: all 0.3s; font-family: inherit; }
-    .ad-input:focus { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.25); box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
-    .ad-label { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.4); display: block; margin-bottom: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .ad-input:focus { background: rgba(255,255,255,0.04); border-color: #00f0ff; box-shadow: 0 0 15px rgba(0,240,255,0.1); }
+    .ad-label { font-size: 10px; font-weight: 800; color: #00f0ff; display: block; margin-bottom: 8px; letter-spacing: 0.1em; text-transform: uppercase; }
     
     .ad-file-drop { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 160px; border-radius: 16px; background: rgba(255,255,255,0.015); border: 1.5px dashed rgba(255,255,255,0.15); cursor: pointer; overflow: hidden; position: relative; transition: all 0.3s ease; }
     .ad-file-drop:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.3); }
@@ -255,8 +196,8 @@ const AdminPanel = () => {
     .ad-file-hover { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px); }
     .ad-file-drop:hover .ad-file-hover { opacity: 1; }
 
-    .btn-create { background: #fff; color: #000; border-radius: 100px; padding: 12px 24px; font-weight: 900; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; }
-    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,255,255,0.15); }
+    .btn-create { background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%)); color: #000; border-radius: 100px; padding: 12px 24px; font-weight: 900; border: none; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.3s; box-shadow: 0 4px 15px rgba(0,240,255,0.4); }
+    .btn-create:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(0,240,255,0.6); }
 
     @media (max-width: 1024px) {
       .sidebar { display: none; }
@@ -291,7 +232,7 @@ const AdminPanel = () => {
         <NavLink to="/admin" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><LayoutGrid size={22} /></NavLink>
         <NavLink to="/users" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><Users size={22} /></NavLink>
         <NavLink to="/admin/profile" className={({ isActive }) => `dock-item ${isActive ? 'active' : ''}`}><User size={22} /></NavLink>
-        <button onClick={setIsModalOpen} className="dock-item" style={{ background: '#fff', color: '#000', marginLeft: '10px' }}><Plus size={22} /></button>
+        <button onClick={() => setIsModalOpen(true)} className="dock-item" style={{ background: '#fff', color: '#000', marginLeft: '10px' }}><Plus size={22} /></button>
       </div>
 
       <aside className="sidebar">
@@ -328,7 +269,7 @@ const AdminPanel = () => {
                 )}
               </NavLink>
             </div>
-            <button className="btn-create" onClick={() => setIsModalOpen(true)}><Plus size={18} /><span>Add Prompts</span></button>
+            <button className="btn-create" onClick={() => setIsModalOpen(true)}><Plus size={18} /><span>Add Node</span></button>
           </div>
         </header>
 
@@ -369,28 +310,7 @@ const AdminPanel = () => {
             <form onSubmit={handleSubmit}>
               <div style={{ marginBottom: '24px' }}><label className="ad-label">NODE TITLE</label><input className="ad-input" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} required placeholder="e.g. Neon Cyberpunk City" /></div>
               <div style={{ marginBottom: '24px' }}><label className="ad-label">CORE PROMPT</label><textarea className="ad-input" style={{ minHeight: '100px', resize: 'vertical' }} value={formData.prompt} onChange={e => setFormData({ ...formData, prompt: e.target.value })} required placeholder="Describe the generated image in detail..." /></div>
-              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." readOnly={imageSynced} style={{ opacity: imageSynced ? 0.7 : 1, cursor: imageSynced ? 'default' : 'text' }} /></div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}>
-                <div>
-                  <label className="ad-label">CATEGORY</label>
-                  <select className="ad-input" value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })}>
-                    <option value="FASHION">Fashion</option>
-                    <option value="CYBERPUNK">Cyberpunk</option>
-                    <option value="ANIME">Anime</option>
-                    <option value="NATURE">Nature</option>
-                    <option value="ARCHITECTURE">Architecture</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="ad-label">MODEL NAME</label>
-                  <select className="ad-input" value={formData.modelName} onChange={e => setFormData({ ...formData, modelName: e.target.value })}>
-                    <option value="Midjourney V6">Midjourney V6</option>
-                    <option value="DALL-E 3">DALL-E 3</option>
-                    <option value="Stable Diffusion">Stable Diffusion</option>
-                  </select>
-                </div>
-              </div>
+              <div style={{ marginBottom: '24px' }}><label className="ad-label">IMAGE URL</label><input className="ad-input" value={formData.imageUrl} onChange={e => setFormData({ ...formData, imageUrl: e.target.value })} placeholder="https://..." /></div>
 
               <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
                 <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.05)' }} />
@@ -404,24 +324,9 @@ const AdminPanel = () => {
                   {filePreview ? (
                     <>
                       <img src={filePreview} className="ad-file-preview" alt="Preview" />
-                      <div className="ad-file-hover" style={{ opacity: isImageSyncing ? 1 : undefined }}>
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
-                          {isImageSyncing ? (
-                            <>
-                              <Loader2 className="spin" size={24} />
-                              <span>Syncing to Core...</span>
-                            </>
-                          ) : imageSynced ? (
-                            <>
-                              <CheckCircle2 size={24} color="#22c55e" />
-                              <span style={{ color: '#22c55e' }}>Synced ✓</span>
-                            </>
-                          ) : (
-                            <>
-                              <Edit2 size={16} />
-                              <span>Replace Image</span>
-                            </>
-                          )}
+                      <div className="ad-file-hover">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', fontWeight: 700, fontSize: '0.85rem' }}>
+                          <Edit2 size={16} /> Replace Image
                         </div>
                       </div>
                     </>
@@ -436,9 +341,9 @@ const AdminPanel = () => {
                 </label>
               </div>
 
-              <button type="submit" disabled={isImageSyncing} className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center', opacity: isImageSyncing ? 0.6 : 1, cursor: isImageSyncing ? 'not-allowed' : 'pointer' }}>
-                {isUploading || isImageSyncing ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
-                {isUploading ? 'Executing...' : isImageSyncing ? 'Syncing Image...' : 'Commit to Core'}
+              <button type="submit" className="btn-create" style={{ width: '100%', padding: '16px', fontSize: '1rem', justifyContent: 'center' }}>
+                {isUploading ? <Loader2 className="spin" size={20} /> : <Sparkles size={20} />}
+                {isUploading ? 'Executing...' : 'Commit to Core'}
               </button>
             </form>
           </div>

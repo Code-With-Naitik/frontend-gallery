@@ -1,22 +1,76 @@
-/* ─── Reset & Base ─── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+/* ─── Base Neo-Chrome Variables ─── */
+:root {
+  --nc-bg: #030303;
+  --nc-glass-1: rgba(255, 255, 255, 0.015);
+  --nc-glass-2: rgba(255, 255, 255, 0.03);
+  --nc-glass-3: rgba(255, 255, 255, 0.06);
+  --nc-bdr: rgba(255, 255, 255, 0.08);
+  --nc-bdr-glow: rgba(0, 240, 255, 0.2);
+  --nc-txt-1: #ffffff;
+  --nc-txt-2: rgba(255, 255, 255, 0.6);
+  --nc-txt-3: rgba(255, 255, 255, 0.3);
+  
+  --nc-neon-cyan: #00f0ff;
+  --nc-neon-purple: #8a2be2;
+  --nc-neon-magenta: #ff00ff;
+  --nc-neon-purple: #8b5cf6;
+  --nc-bdr: rgba(255, 255, 255, 0.08);
+  --nc-glass-1: rgba(255, 255, 255, 0.03);
+  --nc-glass-2: rgba(255, 255, 255, 0.06);
+  --nc-glass-3: rgba(255, 255, 255, 0.12);
+  --nc-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --nc-easing: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-body {
-  margin: 0;
+/* ─── Reset & Base ─── */
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  width: 100%;
-  min-height: 100svh;
+body {
+  background: var(--nc-bg);
+  color: var(--nc-txt-1);
+  font-family: 'Cabinet Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: hidden;
+  line-height: 1.5;
 }
 
-/* ─── Custom Scrollbar ─── */
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: #0D0F1A; }
-::-webkit-scrollbar-thumb { background: #252B4A; border-radius: 10px; }
+/* ── NEO-CHROME GLOBAL EFFECTS ── */
+.hp-noise-overlay {
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.03;
+  background-image: url('https://grainy-gradients.vercel.app/noise.svg');
+}
+
+.hp-glow-mesh {
+  position: fixed; inset: 0; z-index: -1;
+  background: 
+    radial-gradient(circle at 80% 20%, rgba(0, 240, 255, 0.04) 0%, transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 40%);
+}
+
+#root { width: 100%; min-height: 100svh; }
+
+/* ─── Custom Cyber Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--nc-bg); }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--nc-neon-cyan); }
+
+/* ─── Global Animation Keyframes ─── */
+@keyframes nc-float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes nc-pulse-border {
+  0% { border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 transparent; }
+  50% { border-color: rgba(0, 240, 255, 0.3); box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); }
+  100% { border-color: rgba(255,255,255,0.08); box-shadow: 0 0 0 transparent; }
+}
+
+@keyframes nc-spin-gradient {
+  to { transform: rotate(360deg); }
+}

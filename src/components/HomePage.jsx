@@ -17,16 +17,16 @@ const GLOBAL_CSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg1:  #000000;
-    --bg2:  #080808;   /* slightly lighter black */
-    --bg3:  #121212;
-    --bg4:  #1c1c1c;
-    --primary: #FFFFFF;
+    --bg1:  var(--nc-bg, #030303);
+    --bg2:  rgba(255,255,255,0.015);
+    --bg3:  rgba(255,255,255,0.03);
+    --bg4:  rgba(255,255,255,0.06);
+    --primary: var(--nc-neon-cyan, #00f0ff);
     --txt1: #FFFFFF;
-    --txt2: #A1A1AA;
-    --txt3: #71717A;
-    --bdr:  rgba(255,255,255,0.06);
-    --bdr-h:rgba(255,255,255,0.12);
+    --txt2: rgba(255,255,255,0.7);
+    --txt3: rgba(255,255,255,0.4);
+    --bdr:  var(--nc-bdr, rgba(255,255,255,0.08));
+    --bdr-h:var(--nc-bdr-glow, rgba(0,240,255,0.2));
     --easing: cubic-bezier(0.16,1,0.3,1);
   }
 
@@ -61,11 +61,12 @@ const GLOBAL_CSS = `
 
   /* ── RESPONSIVE UTILS ── */
   .hp-hero-title {
-    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800;
-    font-size: clamp(2.8rem, 9vw, 5.5rem); lineHeight: 1; letter-spacing: -0.04em;
-    background: linear-gradient(to bottom, #FFF 40%, rgba(255,255,255,0.6) 100%);
+    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 900;
+    font-size: clamp(2.8rem, 9vw, 6.5rem); lineHeight: 1; letter-spacing: -0.06em;
+    background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%));
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     padding-bottom: 0.2em;
+    filter: drop-shadow(0 0 40px rgba(0, 240, 255, 0.4)) drop-shadow(0 0 40px rgba(0, 240, 255, 0.2));
   }
 
   .hp-hero-stats {
@@ -81,7 +82,7 @@ const GLOBAL_CSS = `
   .hp-hero-glow {
     position: absolute; top: -10%; left: 50%; transform: translateX(-50%);
     width: 100%; height: 100%;
-    background: radial-gradient(circle at 50% 30%, rgba(255,255,255,0.03) 0%, transparent 70%);
+    background: radial-gradient(circle at 50% 30%, rgba(0,240,255,0.1) 0%, transparent 60%);
     pointer-events: none; z-index: 0;
   }
   .hp-orb {
@@ -103,7 +104,10 @@ const GLOBAL_CSS = `
     .spotlight-title { font-size: 1.6rem; }
     .spotlight-info { padding: 20px; }
     .hp-upload-grid { grid-template-columns: 1fr !important; gap: 2rem !important; }
-    .hp-upload-zone { height: 280px !important; }
+    .hp-upload-zone { height: 260px !important; }
+    .hp-upload-section { padding: 1.5rem 1.25rem 6rem !important; }
+    .hp-upload-title { font-size: 2rem !important; }
+    .hp-upload-2col { grid-template-columns: 1fr !important; }
     
     /* Mobile hero padding */
     .hp-hero-inner { padding: 0 1.25rem !important; }
@@ -221,21 +225,20 @@ const GLOBAL_CSS = `
 
   /* ── BUTTONS ── */
   .hp-btn-primary {
-    background: var(--primary);
-    color: var(--bg1);
+    background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%));
+    color: #000;
     border: none; border-radius: 100px;
     padding: 0.8rem 1.7rem;
-    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem;
+    font-family: 'Cabinet Grotesk', sans-serif; font-weight: 800; font-size: 0.9rem;
     cursor: pointer;
-    box-shadow: 0 4px 14px rgba(255,255,255,0.15);
-    transition: transform 0.25s var(--easing), box-shadow 0.25s var(--easing), background 0.25s;
+    box-shadow: 0 4px 20px rgba(0, 240, 255, 0.4);
+    transition: transform 0.25s var(--easing), box-shadow 0.25s var(--easing);
     display: inline-flex; align-items: center; gap: 0.5rem;
     white-space: nowrap;
   }
   .hp-btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255,255,255,0.25);
-    background: #E4E4E7;
+    box-shadow: 0 6px 30px rgba(0, 240, 255, 0.6);
   }
   .hp-btn-ghost {
     background: transparent;
@@ -254,28 +257,30 @@ const GLOBAL_CSS = `
     transform: translateY(-2px);
   }
 
-  /* ── PREMIUM DARK CARDS (RESTYLED) ── */
+  /* ── PREMIUM DARK CARDS (RESTYLED NEO-CHROME) ── */
   .hp-card {
-    background: #060606;
-    border: 1px solid rgba(255,255,255,0.04);
+    background: rgba(3, 3, 3, 0.4);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--nc-bdr);
     border-radius: 20px;
     overflow: hidden;
     cursor: pointer;
     position: relative;
-    transition: transform 0.4s var(--easing), border-color 0.3s;
+    transition: transform 0.4s var(--easing), border-color 0.3s, box-shadow 0.4s;
     min-height: 420px;
     display: flex;
     flex-direction: column;
   }
   .hp-card:hover {
     transform: translateY(-8px);
-    border-color: rgba(255,255,255,0.15);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 20px rgba(255,255,255,0.02);
+    border-color: var(--nc-neon-cyan);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0, 240, 255, 0.15);
   }
   
   .hp-card-accent-bar {
     height: 2.5px;
-    background: rgba(255,255,255,0.15);
+    background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%));
     width: 100%;
     position: absolute; top: 0; left: 0; z-index: 5;
   }
@@ -308,12 +313,13 @@ const GLOBAL_CSS = `
   /* ── BADGES ── */
   .hp-badge-f {
     position: absolute; top: 1.25rem; left: 1.25rem; z-index: 3;
-    background: rgba(0,0,0,0.55);
-    color: #FFFFFF;
-    border: 0.5px solid rgba(255,255,255,0.20);
-    font-size: 10px; font-weight: 500; letter-spacing: 0.07em;
+    background: rgba(0,240,255,0.1);
+    color: var(--nc-neon-cyan);
+    border: 0.5px solid rgba(0,240,255,0.3);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.07em;
     padding: 4px 10px; border-radius: 100px;
     text-transform: uppercase;
+    box-shadow: 0 0 10px rgba(0,240,255,0.2);
   }
 
   /* ── METADATA TAGS ── */
@@ -401,14 +407,14 @@ const GLOBAL_CSS = `
   .hp-btn-s-ghost:hover { background: rgba(255,255,255,0.20); color: #fff; }
 
   .hp-btn-s-solid {
-    background: #FFFFFF;
+    background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%));
     color: #000000;
-    border: 0.5px solid #FFFFFF;
-    font-size: 10px; font-weight: 500; padding: 5px 12px;
+    border: none;
+    font-size: 10px; font-weight: 700; padding: 5px 12px;
     border-radius: 8px; letter-spacing: 0.04em;
-    cursor: pointer; transition: opacity 0.2s;
+    cursor: pointer; transition: opacity 0.2s, box-shadow 0.2s;
   }
-  .hp-btn-s-solid:hover { opacity: 0.88; }
+  .hp-btn-s-solid:hover { opacity: 0.88; box-shadow: 0 0 10px rgba(0,240,255,0.4); }
 
   .hp-model-chip-f {
     position: absolute; bottom: 14px; right: 14px; z-index: 2;
@@ -434,15 +440,15 @@ const GLOBAL_CSS = `
   /* ── SEARCH ── */
   .hp-search-wrap {
     position: relative; display: flex; align-items: center;
-    background: var(--bg2); border-radius: 100px;
-    border: 1px solid var(--bdr);
+    background: var(--nc-glass-2); border-radius: 100px;
+    border: 1px solid var(--nc-bdr);
     padding: 0.25rem 0.25rem 0.25rem 1.5rem;
     transition: border-color 0.25s, box-shadow 0.25s;
     flex: 1; max-width: 600px; margin: 0 auto;
   }
   .hp-search-wrap:focus-within {
-    border-color: rgba(255,255,255,0.2);
-    box-shadow: 0 0 0 4px rgba(255,255,255,0.05);
+    border-color: var(--nc-neon-cyan);
+    box-shadow: 0 0 15px rgba(0,240,255,0.2);
   }
   .hp-search-input {
     background: transparent; border: none; outline: none;
@@ -456,21 +462,23 @@ const GLOBAL_CSS = `
   /* ── FILTER TABS ── */
   .hp-filter-tab {
     background: transparent;
-    border: 1px solid var(--bdr);
+    border: 1px solid var(--nc-bdr);
     border-radius: 100px;
     color: var(--txt2);
     font-family: 'Cabinet Grotesk', sans-serif;
     font-weight: 600; font-size: 0.78rem; letter-spacing: 0.04em;
     padding: 0.4rem 1.1rem;
     cursor: pointer;
-    transition: all 0.2s var(--easing);
+    transition: all 0.2s var(--easing), box-shadow 0.2s;
     white-space: nowrap;
   }
-  .hp-filter-tab:hover { border-color: var(--bdr-h); color: var(--txt1); }
+  .hp-filter-tab:hover { border-color: var(--nc-neon-cyan); color: var(--txt1); }
   .hp-filter-tab.active {
-    background: var(--primary);
-    color: var(--bg1);
-    border-color: var(--primary);
+    background: var(--nc-gradient, linear-gradient(135deg, #00f0ff 0%, #8a2be2 100%));
+    color: #000;
+    font-weight: 800;
+    border-color: transparent;
+    box-shadow: 0 4px 15px rgba(0,240,255,0.4);
   }
 
   /* ── MASONRY GRID ── */
@@ -502,8 +510,8 @@ const GLOBAL_CSS = `
 
   .hp-col-card {
     position: relative; border-radius: 24px; overflow: hidden;
-    background: var(--bg2);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: var(--nc-glass-2);
+    border: 1px solid var(--nc-bdr);
     height: 400px;
     cursor: pointer;
     transition: transform 0.4s var(--easing), border-color 0.4s var(--easing), box-shadow 0.4s var(--easing);
@@ -511,10 +519,10 @@ const GLOBAL_CSS = `
   .hp-col-card::before {
     content: ''; position: absolute; inset: 0;
     border-radius: inherit; pointer-events: none;
-    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+    box-shadow: inset 0 0 0 1px var(--nc-glass-1);
     z-index: 10;
   }
-  .hp-col-card:hover { transform: translateY(-6px) scale(1.02); border-color: rgba(255,255,255,0.15); box-shadow: 0 32px 64px rgba(0,0,0,0.8); }
+  .hp-col-card:hover { transform: translateY(-6px) scale(1.02); border-color: var(--nc-neon-purple); box-shadow: 0 32px 64px rgba(0,0,0,0.8), 0 0 20px rgba(138,43,226,0.3); }
   .hp-col-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s var(--easing); }
   .hp-col-card:hover img { transform: scale(1.06); }
   .hp-col-overlay {
@@ -526,20 +534,21 @@ const GLOBAL_CSS = `
 
   /* ── MODAL ── */
   .hp-modal-backdrop {
-    position: fixed; inset: 0; z-index: 10000;
+    position: fixed; inset: 0; z-index: 30000;
     background: rgba(0,0,0,0.85);
     backdrop-filter: blur(20px);
-    display: flex; align-items: center; justify-content: center; padding: 1rem;
+    display: flex; align-items: center; justify-content: center; padding: 2rem 1rem;
   }
   .hp-modal-box {
     max-width: 960px; width: 100%;
-    background: var(--bg2);
-    border: 1px solid var(--bdr-h);
+    background: rgba(8, 8, 8, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--nc-bdr);
     border-radius: 24px;
     position: relative; max-height: 92vh; overflow: hidden;
     display: grid; grid-template-columns: 1fr 1.15fr;
     animation: fadeUp 0.5s var(--easing) both;
-    box-shadow: 0 40px 120px rgba(0,0,0,0.8);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.9), 0 0 40px rgba(0,240,255,0.1);
   }
   @media (max-width: 768px) {
     .hp-modal-backdrop { padding: 0; align-items: flex-end; }
@@ -617,7 +626,7 @@ const GLOBAL_CSS = `
 
   .hp-toast-progress {
     position: absolute; bottom: 0; left: 0; height: 3px;
-    background: linear-gradient(90deg, #FFF, rgba(255,255,255,0.1));
+    background: var(--nc-gradient, linear-gradient(90deg, #00f0ff, #8a2be2));
     animation: toastProgress 2.2s linear forwards;
   }
 
@@ -731,23 +740,40 @@ const GLOBAL_CSS = `
 
   .spotlight-card {
     position: relative;
-    min-width: 380px;
-    height: 540px;
+    min-width: 420px;
+    height: 580px;
     border-radius: 40px;
     overflow: hidden;
     cursor: pointer;
-    background: #0F0F0F;
-    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.8s var(--easing);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #030303;
+    transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 1s var(--nc-easing);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     flex-shrink: 0;
-    perspective: 1000px;
+    perspective: 2000px;
     transform-style: preserve-3d;
   }
 
   .spotlight-card:hover {
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9), 0 0 40px rgba(255, 255, 255, 0.05);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 50px 120px rgba(0, 0, 0, 1), 0 0 30px rgba(0, 240, 255, 0.1);
     z-index: 10;
+  }
+
+  .spotlight-shine {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(600px circle at 0px 0px, rgba(255,255,255,0.12), transparent 80%);
+    pointer-events: none;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.5s;
+    mix-blend-mode: overlay;
+  }
+
+  .spotlight-card:hover .spotlight-shine {
+    opacity: 1;
   }
 
   .spotlight-img-wrap {
@@ -989,63 +1015,104 @@ function Marquee() {
    HERO
 ───────────────────────────────────────────── */
 function Hero({ totalCount }) {
-  return (
-    <section style={{
-      paddingTop: "180px", paddingBottom: "6rem", position: "relative",
-      display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
-      overflow: "hidden", background: "var(--bg1)"
-    }}>
-      {/* Dynamic Background Elements */}
-      <div className="hp-hero-glow" />
-      <div className="hp-orb" style={{ width: '400px', height: '400px', background: 'rgba(255,255,255,0.02)', top: '-100px', left: '10%' }} />
-      <div className="hp-orb" style={{ width: '300px', height: '300px', background: 'rgba(255,255,255,0.015)', bottom: '50px', right: '15%', animationDelay: '-5s' }} />
+  const [mPos, setMPos] = useState({ x: 0, y: 0 });
+  const handleMouseMove = (e) => {
+    setMPos({ x: (e.clientX / window.innerWidth - 0.5) * 40, y: (e.clientY / window.innerHeight - 0.5) * 40 });
+  };
 
-      <div className="hp-hero-inner" style={{ position: "relative", zIndex: 1, maxWidth: "1000px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
+  return (
+    <section
+      onMouseMove={handleMouseMove}
+      style={{
+        paddingTop: "190px", paddingBottom: "10rem", position: "relative",
+        display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center",
+        overflow: "hidden", background: "var(--bg1)"
+      }}>
+      {/* ── DYNAMIC ATMOSPHERE ── */}
+      <div className="hp-hero-glow" style={{ opacity: 0.6 }} />
+      <div className="hp-orb" style={{
+        width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(0, 240, 255, 0.08), transparent 70%)',
+        top: '-20%', left: '-10%', transform: `translate(${mPos.x * 0.8}px, ${mPos.y * 0.8}px)`, transition: 'transform 0.15s ease-out'
+      }} />
+      <div className="hp-orb" style={{
+        width: '500px', height: '500px', background: 'radial-gradient(circle, rgba(139, 92, 246, 0.05), transparent 70%)',
+        bottom: '0%', right: '-5%', transform: `translate(${-mPos.x * 1.2}px, ${-mPos.y * 1.2}px)`,
+        animationDelay: '-5s', transition: 'transform 0.15s ease-out'
+      }} />
+
+      {/* ── FLOATING CHIPS (Neo-Chrome Decor) ── */}
+      <div style={{ position: 'absolute', top: '25%', left: '15%', animation: 'float 6s infinite alternate ease-in-out', zIndex: 1, pointerEvents: 'none' }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,240,255,0.2)', padding: '8px 16px', borderRadius: '100px', backdropFilter: 'blur(10px)', fontSize: '0.7rem', fontWeight: 800, color: 'var(--nc-neon-cyan)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Prompt</div>
+      </div>
+      <div style={{ position: 'absolute', top: '40%', right: '12%', animation: 'float 8s infinite alternate-reverse ease-in-out', zIndex: 1, pointerEvents: 'none' }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(139,92,246,0.2)', padding: '8px 16px', borderRadius: '100px', backdropFilter: 'blur(10px)', fontSize: '0.7rem', fontWeight: 800, color: 'var(--nc-neon-purple)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Generator Free</div>
+      </div>
+
+      <div className="hp-hero-inner" style={{ position: "relative", zIndex: 2, maxWidth: "1200px", margin: "0 auto", padding: "0 2rem", width: "100%" }}>
         {/* EyeBrow */}
-        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0s", marginBottom: "2rem" }}>
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0s", marginBottom: "2.5rem" }}>
           <span className="hp-hero-badge" style={{
-            fontSize: "0.7rem", letterSpacing: "0.4em", textTransform: "uppercase",
+            fontSize: "0.68rem", letterSpacing: "0.35em", textTransform: "uppercase",
             background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-            padding: "0.6rem 1.5rem", borderRadius: '100px', color: 'rgba(255,255,255,0.5)',
-            fontWeight: 700
+            padding: "0.75rem 2rem", borderRadius: '100px', color: 'rgba(255,255,255,0.6)',
+            fontWeight: 800, backdropFilter: 'blur(12px)'
           }}>
-            Community Prompt Studio & Gallery
+            State-of-the-art Prompt Studio
           </span>
         </div>
 
         {/* Headline */}
-        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.1s", marginBottom: "1.5rem" }}>
-          <h1 className="hp-hero-title">
-            Share the prompts<br />behind the art.
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.15s", marginBottom: "2rem" }}>
+          <h1 className="hp-hero-title" style={{ fontSize: 'clamp(3rem, 10vw, 7.5rem)', lineHeight: 0.95, letterSpacing: '-0.06em' }}>
+            Infinite Vision.<br />
+            <span style={{
+              background: 'linear-gradient(to right, #FFF, rgba(255,255,255,0.4))',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              filter: 'none'
+            }}>Curated </span>
+            <span style={{ color: "transparent", WebkitTextStroke: "1px rgba(0,240,255,0.8)", filter: 'drop-shadow(0 0 20px rgba(0,240,255,0.3))' }}>Prompts.</span>
           </h1>
         </div>
 
-        {/* Sub */}
-        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.2s", marginBottom: "3rem" }}>
+        {/* Sub text */}
+        <div style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.3s", marginBottom: "4rem" }}>
           <p style={{
-            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 500, fontSize: "clamp(1rem, 2vw, 1.25rem)",
-            color: "var(--txt2)", lineHeight: 1.6, maxWidth: "700px", margin: "0 auto", opacity: 0.8
+            fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 500, fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+            color: "rgba(255,255,255,0.55)", lineHeight: 1.5, maxWidth: "800px", margin: "0 auto"
           }}>
-            Discover trending AI images and videos that inspire your next creation. Join the community pushing the boundaries of generative art.
+            Enter a digital vault where cinematic aesthetics meet next-gen AI.
+            Discover, curate, and deploy professional prompts for world-class visual generation.
           </p>
         </div>
 
         {/* Actions */}
-        <div className="hp-hero-actions" style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.3s", display: 'flex', gap: '1rem', justifyContent: 'center', marginBottom: '4rem' }}>
-          <button className="hp-btn-primary" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Get Started ✦</button>
-          <button className="hp-btn-ghost" style={{ padding: '1rem 2.5rem', fontSize: '1rem' }}>Browse Gallery</button>
+        <div className="hp-hero-actions" style={{ animation: "fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both", animationDelay: "0.4s", display: 'flex', gap: '1.5rem', justifyContent: 'center', marginBottom: '6rem' }}>
+          <button className="hp-btn-primary" style={{ padding: '1.25rem 3.5rem', fontSize: '1.1rem', borderRadius: '15px' }}>Open Studio ✦</button>
+          <button className="hp-btn-ghost" style={{ padding: '1.25rem 3.5rem', fontSize: '1.1rem', borderRadius: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)' }}>Discovery Mode</button>
         </div>
 
-        {/* Stats */}
-        <div className="hp-hero-stats" style={{ animation: "fadeIn 1.2s ease both", animationDelay: "0.5s" }}>
+        {/* ── PREMIUM STATS DASHBOARD ── */}
+        <div className="hp-hero-stats" style={{
+          animation: "fadeUp 1.2s ease both", animationDelay: "0.6s",
+          background: 'rgba(5,5,5,0.4)',
+          backdropFilter: 'blur(20px)',
+          borderRadius: '35px', padding: '4rem 2rem',
+          border: '1px solid rgba(255,255,255,0.06)',
+          display: 'flex', justifyContent: 'center', gap: '6rem',
+          boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
+          position: 'relative', width: '100%', maxWidth: '1100px'
+        }}>
+          {/* Subtle grid pattern inside stats */}
+          <div style={{ position: 'absolute', inset: 0, opacity: 0.05, backgroundImage: 'radial-gradient(#FFF 1px, transparent 1px)', backgroundSize: '30px 30px', pointerEvents: 'none' }} />
+
           {[
-            [totalCount || "10K+", "Prompts Shared"],
-            ["240+ ", "Active Creators"],
-            ["50K", "Community Saves"]
-          ].map(([val, lbl]) => (
-            <div key={lbl} style={{ textAlign: "center" }}>
-              <div className="stat-val">{val}</div>
-              <div className="stat-lbl" style={{ opacity: 0.5 }}>{lbl}</div>
+            [totalCount || "18K", "PROMPTS"],
+            ["480+ ", "CREATORS"],
+            ["100%", "PRECISION"]
+          ].map(([val, lbl], i) => (
+            <div key={i} style={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
+              <div className="stat-val" style={{ fontSize: '4.5rem', fontWeight: 950, letterSpacing: '-0.05em', background: 'linear-gradient(to bottom, #FFF, #71717A)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', lineHeight: 1 }}>{val}</div>
+              <div className="stat-lbl" style={{ fontSize: '0.8rem', fontWeight: 900, color: 'var(--nc-neon-cyan)', letterSpacing: '0.25em', marginTop: '0.85rem', textTransform: 'uppercase' }}>{lbl}</div>
             </div>
           ))}
         </div>
@@ -1092,14 +1159,18 @@ function PromptCard({ data, index, onOpen, onCopy, onAuthRequired, className = "
 
         {/* Image Zone */}
         <div className="hp-card-img-zone">
-          <img src={data.imageUrl} className="hp-card-img" alt={data.title} loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
+          <img src={data.imageUrl} className="hp-card-img" alt={data.title} loading="lazy" onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
           <div className="hp-card-scrim" />
         </div>
 
         {/* Floating Badges */}
-        <div style={{ position: 'absolute', top: '1.25rem', left: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', zIndex: 10 }}>
-          <div className="hp-badge-f" style={{ position: 'static' }}>{badgeLabel}</div>
-          <div className={`hp-meta-badge ${data.priority === 'High' ? 'priority-high' : data.priority === 'Medium' ? 'priority-med' : 'priority-low'}`}>
+        <div style={{ position: 'absolute', top: '1.5rem', left: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.6rem', zIndex: 10 }}>
+          <div className="hp-badge-f" style={{
+            position: 'static', background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.15)',
+            backdropFilter: 'blur(10px)', fontSize: '0.65rem', padding: '6px 12px', borderRadius: '4px'
+          }}>{badgeLabel}</div>
+          <div className={`hp-meta-badge ${data.priority === 'High' ? 'priority-high' : data.priority === 'Medium' ? 'priority-med' : 'priority-low'}`}
+            style={{ fontSize: '0.62rem', letterSpacing: '0.12em', fontWeight: 900, textTransform: 'uppercase', borderRadius: '4px' }}>
             {data.priority || 'Normal'}
           </div>
         </div>
@@ -1246,6 +1317,7 @@ function UploadView({ onBack }) {
   const ref = useFadeIn();
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [imageUrlInput, setImageUrlInput] = useState("");
   const [uploading, setUploading] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [formData, setFormData] = useState({
@@ -1260,12 +1332,24 @@ function UploadView({ onBack }) {
     dueDate: ""
   });
 
-
   const onFileSelect = (e) => {
     const f = e.target.files[0];
     if (f) {
       setFile(f);
+      setImageUrlInput("");
       setPreview(URL.createObjectURL(f));
+    }
+  };
+
+  // Auto-populate preview when a URL is typed/pasted
+  const onImageUrlChange = (e) => {
+    const url = e.target.value;
+    setImageUrlInput(url);
+    if (url.trim()) {
+      setFile(null); // clear file if URL is provided
+      setPreview(url.trim());
+    } else {
+      setPreview(null);
     }
   };
 
@@ -1274,6 +1358,7 @@ function UploadView({ onBack }) {
     e.stopPropagation();
     setFile(null);
     setPreview(null);
+    setImageUrlInput("");
   };
 
   const addTag = (val) => {
@@ -1292,22 +1377,25 @@ function UploadView({ onBack }) {
 
   const handleUpload = async (e) => {
     e.preventDefault();
-    if (!file || !formData.title) return alert("Please fill title and select image");
+    if (!formData.title) return alert("Please fill in the title.");
+    if (!file && !imageUrlInput.trim()) return alert("Please select an image file or enter an Image URL.");
 
     setUploading(true);
     try {
-      // 1. UPLOAD IMAGE TO SERVER
-      const uploadData = new FormData();
-      uploadData.append("image", file);
+      let imageUrl = imageUrlInput.trim();
 
-      const uploadRes = await axios.post(`${config.API_BASE_URL}/api/upload`, uploadData);
-      const imageUrl = uploadRes.data.imageUrl;
+      // Only upload file if no URL was provided
+      if (file && !imageUrl) {
+        const uploadData = new FormData();
+        uploadData.append("image", file);
+        const uploadRes = await axios.post(`${config.API_BASE_URL}/api/upload`, uploadData);
+        imageUrl = uploadRes.data.imageUrl;
+      }
 
-      // 2. SEND METADATA TO DATABASE
       const payload = {
         title: formData.title,
         prompt: formData.prompt,
-        imageUrl: imageUrl,
+        imageUrl,
         category: formData.category,
         modelName: formData.modelName,
         tags: formData.tags,
@@ -1316,7 +1404,6 @@ function UploadView({ onBack }) {
         priority: formData.priority,
         dueDate: formData.dueDate
       };
-
 
       await axios.post(`${config.API_BASE_URL}/category`, payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -1337,10 +1424,10 @@ function UploadView({ onBack }) {
   };
 
   return (
-    <section ref={ref} className="hp-fade" style={{ padding: "4rem 2.5rem 8rem", maxWidth: 1000, margin: "0 auto" }}>
+    <section ref={ref} className="hp-fade hp-upload-section" style={{ padding: "4rem 2.5rem 8rem", maxWidth: 1000, margin: "0 auto" }}>
       <div style={{ marginBottom: "3.5rem" }}>
         <button onClick={onBack} className="hp-btn-ghost" style={{ marginBottom: "1.5rem" }}>← Back to Discover</button>
-        <h1 style={{
+        <h1 className="hp-upload-title" style={{
           fontFamily: "'Cabinet Grotesk', sans-serif",
           fontWeight: 800, fontSize: "3.5rem", letterSpacing: "-0.03em", color: "var(--txt1)"
         }}>
@@ -1354,13 +1441,15 @@ function UploadView({ onBack }) {
         <div>
           <label className="hp-upload-zone" style={{
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-            height: 500, border: "2px dashed var(--bdr)", borderRadius: 32, cursor: "pointer",
+            height: 320, border: "2px dashed var(--bdr)", borderRadius: 32, cursor: "pointer",
             background: "rgba(255,255,255,0.02)", transition: "all 0.3s", overflow: "hidden", position: "relative"
           }}>
             <input type="file" hidden onChange={onFileSelect} accept="image/*" id="hp-file-input" />
             {preview ? (
               <div style={{ width: "100%", height: "100%", position: "relative" }}>
-                <img src={preview} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="Preview" />
+                <img src={preview} style={{ width: "100%", height: "100%", objectFit: "cover" }} alt="Preview"
+                  onError={e => { e.target.onerror = null; setPreview(null); }}
+                />
                 <button
                   type="button"
                   onClick={resetImage}
@@ -1380,11 +1469,42 @@ function UploadView({ onBack }) {
             ) : (
               <div style={{ textAlign: "center", padding: "2rem" }}>
                 <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📸</div>
-                <p style={{ fontWeight: 600, color: "var(--txt1)" }}>Drop image here or click</p>
+                <p style={{ fontWeight: 600, color: "var(--txt1)" }}>Click to browse or drop file</p>
                 <p style={{ fontSize: "0.85rem", color: "var(--txt3)", marginTop: "0.5rem" }}>Supports JPG, PNG, WEBP (Max 10MB)</p>
               </div>
             )}
           </label>
+
+          {/* IMAGE URL INPUT */}
+          <div style={{ marginTop: "1rem" }}>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.5rem", letterSpacing: "0.08em" }}>Image URL</label>
+            <input
+              type="url"
+              value={imageUrlInput}
+              onChange={onImageUrlChange}
+              placeholder="https://..."
+              style={{
+                width: "100%", background: "var(--bg3)", border: "1px solid var(--bdr)",
+                padding: "0.9rem 1rem", borderRadius: 12, color: "#FFF",
+                fontSize: "0.9rem", outline: "none", transition: "border-color 0.2s",
+                fontFamily: "'Cabinet Grotesk', sans-serif",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                display: "block"
+              }}
+              onFocus={e => e.target.style.borderColor = "var(--primary)"}
+              onBlur={e => e.target.style.borderColor = "var(--bdr)"}
+            />
+            {imageUrlInput && (
+              <div style={{
+                fontSize: "0.72rem", color: "var(--txt3)", marginTop: "0.4rem",
+                whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                maxWidth: "100%", fontFamily: "'Cabinet Grotesk', sans-serif"
+              }}>
+                🔗 {imageUrlInput}
+              </div>
+            )}
+            <p style={{ fontSize: "0.72rem", color: "var(--txt3)", marginTop: "0.3rem" }}>Paste a URL — preview auto-loads above. Or click the zone to upload a file.</p>
+          </div>
         </div>
 
         {/* Right: Info */}
@@ -1457,7 +1577,7 @@ function UploadView({ onBack }) {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div className="hp-upload-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Issue Type</label>
               <select
@@ -1480,7 +1600,7 @@ function UploadView({ onBack }) {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div className="hp-upload-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Assignee</label>
               <input
@@ -1503,7 +1623,7 @@ function UploadView({ onBack }) {
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+          <div className="hp-upload-2col" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
             <div>
               <label style={{ display: "block", fontSize: "0.82rem", fontWeight: 700, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "0.6rem" }}>Category</label>
               <select
@@ -1606,14 +1726,17 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
 
-    const rotateX = (y - centerY) / 20; // stronger tilt
-    const rotateY = (centerX - x) / 20;
+    const rotateX = (y - centerY) / 12; // much stronger tilt for deep depth
+    const rotateY = (centerX - x) / 12;
 
-    cardEl.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-20px) scale(1.05)`;
+    cardEl.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-30px) scale(1.08)`;
 
     const shine = cardEl.querySelector('.spotlight-shine');
     if (shine) {
+      shine.style.opacity = '1';
       shine.style.transform = `translate(${x - rect.width}px, ${y - rect.height}px)`;
+      // Add liquid shimmer light-leak effect
+      shine.style.background = `radial-gradient(600px circle at ${x}px ${y}px, rgba(255,255,255,0.15), transparent 80%)`;
     }
   };
 
@@ -1671,7 +1794,7 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
           >
             <div className="spotlight-shine" />
             <div className="spotlight-img-wrap">
-              <img src={cat.imageUrl} className="spotlight-img" alt={cat.title} onError={(e) => { e.target.onerror = null; e.target.src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
+              <img src={cat.imageUrl} className="spotlight-img" alt={cat.title} onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=400"; }} />
             </div>
             <div className="spotlight-overlay" />
 
@@ -1700,49 +1823,56 @@ function SpotlightCinema({ prompts, onOpen, onViewAll }) {
 function CollectionsView({ prompts, onSelectCollection, query }) {
   const ref = useFadeIn();
   const collections = useMemo(() => {
-    if (!Array.isArray(prompts)) return []; // Defense
+    if (!Array.isArray(prompts)) return [];
     const groups = {};
     prompts.forEach(p => {
       const pTags = Array.isArray(p.tags) && p.tags.length > 0 ? p.tags : ["GENERAL"];
       pTags.forEach(tag => {
-        const t = tag.toUpperCase().replace("#", "");
+        const t = tag.toUpperCase().replace("#", "").trim();
+        if (!t) return;
         if (!groups[t]) groups[t] = { name: t, raw: tag, items: [], cover: p.imageUrl };
         groups[t].items.push(p);
       });
     });
-    return Object.values(groups).filter(c =>
-      c.name.toLowerCase().includes(query.toLowerCase())
-    );
+    return Object.values(groups)
+      .filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => b.items.length - a.items.length);
   }, [prompts, query]);
 
   return (
-    <section ref={ref} className="hp-fade" style={{ padding: "2rem 2.5rem 8rem", maxWidth: 1320, margin: "0 auto" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "1.5rem" }}>
+    <section ref={ref} className="hp-fade" style={{ padding: "0 2.5rem 8rem", maxWidth: 1320, margin: "0 auto" }}>
+      <div className="hp-collections-grid" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))", gap: "2.5rem" }}>
         {collections.map((col, i) => (
           <div
             key={col.name}
             className="hp-col-card"
             onClick={() => onSelectCollection(col.raw)}
-            style={{ animationDelay: `${i * 0.07}s` }}
+            style={{ animationDelay: `${i * 0.07}s`, height: '450px' }}
           >
             <img src={col.cover} alt={col.name} />
             <div className="hp-col-overlay">
-              <span className="hp-chip" style={{ marginBottom: "0.65rem", alignSelf: "flex-start" }}>{col.items.length} items</span>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'auto' }}>
+                <span className="hp-chip" style={{ background: 'var(--nc-neon-cyan)', color: '#000', fontWeight: 900 }}>{col.items.length} ASSETS</span>
+                <div style={{ padding: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '50%', backdropFilter: 'blur(10px)' }}>
+                  <Bookmark size={18} color="white" />
+                </div>
+              </div>
               <h3 style={{
                 fontFamily: "'Cabinet Grotesk', sans-serif",
-                fontWeight: 700, fontSize: "1.75rem", color: "var(--txt1)", lineHeight: 1.15
+                fontWeight: 900, fontSize: "2.5rem", color: "white", lineHeight: 1, letterSpacing: '-0.04em', textShadow: '0 10px 30px rgba(0,0,0,0.5)'
               }}>
                 {col.name.replace(/_/g, " ")}
               </h3>
-              <div className="hp-count-pill">{col.items.length} Records →</div>
+              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginTop: '0.5rem', fontWeight: 500 }}>Explore {col.items.length} curated prompts in this collection.</p>
+              <div className="hp-count-pill" style={{ marginTop: '1.5rem', alignSelf: 'flex-start' }}>View Collection →</div>
             </div>
           </div>
         ))}
       </div>
       {collections.length === 0 && (
         <div style={{ textAlign: "center", padding: "8rem 0" }}>
-          <p style={{ fontFamily: "'Cabinet Grotesk', sans-serif", color: "var(--txt3)", fontSize: "0.9rem", letterSpacing: "0.1em" }}>
-            No collections found
+          <p style={{ fontFamily: "'Cabinet Grotesk', sans-serif", color: "var(--txt3)", fontSize: "1.1rem", letterSpacing: "0.1em" }}>
+            No collections found. Curate your first asset to start.
           </p>
         </div>
       )}
@@ -1794,7 +1924,7 @@ function WishlistView({ onOpen, onCopy }) {
 ───────────────────────────────────────────── */
 function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { token } = useAuth();
+  const { token, adminToken } = useAuth();
   useEffect(() => {
     const fn = e => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", fn);
@@ -1805,8 +1935,21 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
   const tags = Array.isArray(data.tags) ? data.tags : [];
   const liked = isInWishlist(data._id || data.id);
 
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this prompt?")) return;
+    try {
+      await axios.delete(`${config.API_BASE_URL}/category/${data._id || data.id}`, {
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+      alert("Prompt deleted successfully");
+      window.location.reload();
+    } catch (err) {
+      alert("Failed to delete: " + (err.response?.data?.error || err.message));
+    }
+  };
+
   return (
-    <div className="hp-modal-backdrop" onClick={onClose}>
+    <div className="hp-modal-backdrop" onClick={onClose} style={{ zIndex: 30000 }}>
       <div className="hp-modal-box" onClick={e => e.stopPropagation()}>
         {/* Close */}
         <button
@@ -1834,7 +1977,17 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
 
         {/* Info Panel */}
         <div className="hp-modal-info" style={{ padding: "3rem 2.5rem", overflowY: "auto", display: "flex", flexDirection: "column", background: "var(--bg2)" }}>
-          <span className="hp-label" style={{ marginBottom: "1.5rem" }}>Prompt Detail</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <span className="hp-label">Prompt Detail</span>
+            {adminToken && (
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button
+                  onClick={handleDelete}
+                  style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171', padding: '0.4rem 0.8rem', borderRadius: '8px', fontSize: '0.7rem', fontWeight: 800, cursor: 'pointer' }}
+                >DELETE</button>
+              </div>
+            )}
+          </div>
 
           <h2 style={{
             fontFamily: "'Cabinet Grotesk', sans-serif",
@@ -1903,14 +2056,6 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
               <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Due Date</label>
               <span style={{ fontSize: "0.85rem", color: "var(--txt1)", fontWeight: 600 }}>{data.dueDate ? new Date(data.dueDate).toLocaleDateString() : "No Deadline"}</span>
             </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Created</label>
-              <span style={{ fontSize: "0.8rem", color: "var(--txt2)" }}>{new Date(data.createdAt).toLocaleDateString()}</span>
-            </div>
-            <div>
-              <label style={{ display: "block", fontSize: "0.65rem", fontWeight: 800, color: "var(--txt3)", textTransform: "uppercase", marginBottom: "4px" }}>Updated</label>
-              <span style={{ fontSize: "0.8rem", color: "var(--txt2)" }}>{new Date(data.updatedAt || data.createdAt).toLocaleDateString()}</span>
-            </div>
           </div>
 
           {/* Tags */}
@@ -1936,7 +2081,7 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
               className={`hp-btn-ghost ${liked ? 'hp-active-pill' : ''}`}
               style={{ flex: 1, padding: "0.9rem", justifyContent: "center", position: 'relative' }}
               onClick={() => {
-                if (!token) {
+                if (!token && !adminToken) {
                   onAuthRequired();
                   return;
                 }
@@ -1965,7 +2110,7 @@ function PromptModal({ data, onClose, onCopy, onAuthRequired }) {
 function AuthModal({ onClose }) {
   const navigate = useNavigate();
   return (
-    <div className="hp-modal-backdrop" onClick={onClose} style={{ zIndex: 11000 }}>
+    <div className="hp-modal-backdrop" onClick={onClose} style={{ zIndex: 30000 }}>
       <div className="hp-modal-box" onClick={e => e.stopPropagation()} style={{ gridTemplateColumns: "1fr", maxWidth: "450px", padding: "3rem", textAlign: "center", borderRadius: "32px", background: "rgba(10,10,12,0.95)" }}>
         <div style={{ fontSize: "3rem", marginBottom: "1.5rem" }}>🔒</div>
         <h2 style={{ fontFamily: "'Cabinet Grotesk', sans-serif", fontWeight: 800, fontSize: "1.75rem", color: "#FFF", marginBottom: "1rem" }}>Login Required</h2>
@@ -2053,7 +2198,7 @@ function FeaturedStrip({ data, onOpen, onCopy }) {
 ───────────────────────────────────────────── */
 export default function PromptGallery() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, adminToken } = useAuth();
   const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("ALL");
@@ -2093,7 +2238,7 @@ export default function PromptGallery() {
   }, [showToast]);
 
   const handleViewChange = (v) => {
-    if ((v === "UPLOAD" || v === "WISHLIST" || v === "STUDIO") && !token) {
+    if ((v === "UPLOAD" || v === "WISHLIST" || v === "STUDIO") && !token && !adminToken) {
       setAuthModal(true);
       return;
     }
@@ -2128,8 +2273,11 @@ export default function PromptGallery() {
 
   return (
     <div style={{ background: "var(--bg1)", color: "var(--txt1)", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+      <div className="hp-noise-overlay" />
+      <div className="hp-glow-mesh" />
+
       {/* Mobile Unique Elements */}
-      <Navbar currentView={view} onView={handleViewChange} query={query} setQuery={setQuery} onAuthModal={setAuthModal} />
+      <Navbar currentView={view} onView={handleViewChange} query={query} setQuery={setQuery} onAuthModal={setAuthModal} hidden={!!modal || authModal} />
 
       {/* ─── GALLERY VIEW ─── */}
       {view === "GALLERY" ? (
